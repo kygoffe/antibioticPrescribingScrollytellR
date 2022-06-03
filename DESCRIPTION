@@ -1,0 +1,38 @@
+Package: antibioticPrescribingScrollytellR
+Title: antibioticPrescribingScrollytellR
+Version: 0.0.0.9000
+Authors@R: 
+    c(person(given = "Kayoung",
+             family = "Goffe",
+             role = c("aut", "cre"),
+             email = "kayoung.goffe1@nhs.net")
+     )
+Description: Antibiotic Prescribing
+License: Apache License (>= 2)
+Imports: 
+    config (>= 0.3.1),
+    golem (>= 0.3.1),
+    shiny (>= 1.6.0),
+    markdown,
+    highcharter,
+    nhsbsaR,
+    magrittr,
+    pkgload,
+    scrollytell,
+    tippy,
+    plotly,
+    stringr,
+    ggplot2,
+    scales,
+    geojsonsf,
+    sf,
+    janitor,
+    reactable
+Remotes:
+    nhsbsa-data-analytics/nhsbsaR
+    statistiekcbs/scrollytell
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.0
+Depends: 
+    R (>= 2.10)

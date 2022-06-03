@@ -1,0 +1,11 @@
+.Rbuildignore
+.Rproj.user
+.Rhistory
+.Rdata
+.httr-oauth
+.DS_Store
+.Renviron
+.RProfile
+rsconnect
+data/*
+data-raw/*.csv
