@@ -23,15 +23,15 @@ mod_ccg_antibiotic_ui <- function(id) {
         nhs_selectInput(
           inputId = ns("region"),
           label = "Region",
-          choices = c(sort(unique(ccg$REGION[ccg$REGION != "England"]))),
+          choices = c(sort(unique(ccg$REGION[ccg$REGION != "England"]))), # Exclude England
           full_width = TRUE
         ),
         nhs_selectInput(
           inputId = ns("metric"),
           label = "Metric",
           choices = c(
-            "Antibacterial items/STAR PU" = "ind44a",
-            "Co-amoxiclav, Cephalosporins & Quinolones" = "ind46b"
+            "Antibacterial items/STAR PU" = "STARPU",
+            "Co-amoxiclav, Cephalosporins & Quinolones" = "COAMOX"
           )
         )
       ),
