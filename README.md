@@ -1,6 +1,5 @@
-# Healthcare Inequalities Scrollytell
+# Antibiotic prescribing
 
-This R package has been developed by the NHS Business Services Authority (NHSBSA) Data Science team, in collaboration with NHS England and NHS Improvement (NHSE/I) National Healthcare Inequalities Improvement Programme, to explore potential healthcare inequalities in England with respect to NHSBSA issued exemption certificates and NHS prescribing across key clinical areas.
 
 ## Features
 
