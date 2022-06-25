@@ -35,22 +35,19 @@ app_ui <- function(request) {
         class = "nhsuk-main-wrapper",
         id = "maincontent",
         role = "main",
-        h1("Antibiotic prescribing"),
+        h1("Antibiotic prescribing in England primary care"),
         hr(),
         nhs_navlistPanel(
           well = TRUE,
           widths = c(3, 9),
-          selected = "England",
+          selected = "Article",
           fluid = FALSE,
           tabPanel(
-            title = "England",
+            title = "Article",
             mod_intro_antibiotic_ui("intro_antibiotic_1"),
+            mod_region_antibiotic_ui("region_antibiotic_1"),
             # mod_s07_copd_ui("s07_copd_ui_1"),
             # mod_s08_saba_ui("s08_saba_ui_1")
-          ),
-          tabPanel(
-            title = "CCG",
-            mod_ccg_antibiotic_ui("ccg_antibiotic_1")
           ),
           tabPanel(
             title = "Definitions",

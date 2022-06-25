@@ -1,3 +1,4 @@
+library(dplyr)
 # Read CCG and pivot longer
 
 ccg <- read.csv("./data-raw/ccg.csv", check.names = FALSE)
@@ -36,6 +37,9 @@ ccg <- ccg |>
     REGION = stringr::str_to_title(REGION),
     REGION = gsub("And", "and", REGION),
     REGION = gsub("Of", "of", REGION)
+  ) %>%  
+  mutate(
+    STP_NAME = trimws(STP_NAME)
   )
 
 

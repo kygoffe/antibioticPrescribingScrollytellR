@@ -10,7 +10,7 @@
 mod_intro_antibiotic_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    # h2_tabstop("Introduction"),
+    h2_tabstop("England Overview"),
     p(
       "Visualisation 1",
       "Two SOF indicators;",

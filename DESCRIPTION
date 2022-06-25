@@ -27,7 +27,8 @@ Imports:
     geojsonsf,
     sf,
     janitor,
-    reactable
+    reactable,
+    plan
 Remotes:
     nhsbsa-data-analytics/nhsbsaR
     statistiekcbs/scrollytell

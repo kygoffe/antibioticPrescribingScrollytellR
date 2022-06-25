@@ -9,3 +9,4 @@
 rsconnect
 data/*
 data-raw/*.csv
+*.csv

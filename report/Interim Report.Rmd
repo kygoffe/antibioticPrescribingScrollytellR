@@ -1,0 +1,91 @@
+---
+title: 'MSc Data Science: Interim report'
+author: "Kayoung Goffe"
+date: '2022-06-07'
+output:
+  pdf_document: default
+link-citations: yes
+bibliography: reference.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(plan)
+```
+
+# Evaluation of a data-driven story on antibiotic prescribing for those working in antimicrobial resistance in England
+
+## Introduction
+
+### Data visualisation and the NHS
+
+The increasing wealth of data produced and managed by the NHS [@dataset2022] has led to new and innovative methods of data presentation[@datasav2022]. Foremost has been the rise of data dashboards, which have been particularly prominent during the COVID-19 pandemic [@datadas2022]. Such visualisation methods are used to inform the general public [@england2022] and support clinical and management decisions within the care service [@dowding2015]. Dashboards provide a complementary interactive method to the traditional narrative-driven and highly structured report often published as either HTML or PDF. Segel & Heer (2010) placed the degree of interactivity of a narrative visualisation on a spectrum from *author-driven* to *data-driven* [@segel2010]. A film can be considered author-driven in that it has a linear ordering of scenes, is heavy on messaging, and its content is not influence-able by the viewer. Whereas, a data dashboard is reader-driven with no prescribed order, no messaging, and its output is dependent on user engagement.
+
+Data-driven storytelling is a recent development in data presentation. It applies a hybrid approach that uses data visualisation methods embedded in a clear narrative format to help support decision making [@stolper2016; @segel2010]. However, approaches that balance a prescribed author narrative with reader story discovery encapsulate a range of methods that span a spectrum of interactivity. Three common schema detailed by Segel & Heer include (1) the *Martini Glass Structure*. This uses the visual analogy of a Martini glass, where the reader first follows a narrowly defined narrative (glass stem) followed by reader-driven interaction with a visulisation (glass mouth). (2) *Interactive Slideshow*, which takes an author-driven slideshow format that is interrupted at regular intervals with visualisations, creating a repeating structure of narrative-interaction. (3) *Drill-down stories* present a general theme structured around interactive visualisation(s) where a reader can obtain greater detail in relation to an area/context of particular interest to them[@segel2010]. Such hybrid methods are uncommon in the NHS and rarely used for internal or public consumption. But if well constructed and user-informed, they have the potential to bridge the challenges faced by standard reports and dashboards, providing a useful and accessible decision-support making tool.
+
+### Project proposal
+
+In response to the NHS Long Term Plan[@thenhs2022], NHS Business Services Authority (NHSBSA) launched its Open Data Portal in 2020 to provide improved access to NHS prescribing data for both those working in the service and the general public [@nhsbsal2022]. The service is hosted on an open source data management system where the code used to support implementation is accessible in a series of GitHub repositories [@about-2022]. It provides monthly surgery-level data on all prescription drugs. To date, the service has been little used beyond freedom of information requests. However, as an employee of NHSBSA we have been asked to consider case studies to exemplify the service's utility.
+
+#### Antibiotic prescribing
+
+Antimicrobial resistance is a leading cause of death globally [@antimicrobialresistancecollaborators2022]. The NHS reported a total of 29 million prescribed antibiotic items between April 1 2021 and March 31 2022 an increase of 5 million items from the previous 12 months[@bnf5.1:2022]. Monitoring and identifying trends in prescription rates is a key issue for decision-makers within the NHS, particularly at the Clinical Commissioning Group (CCG) level, to help support efforts in combating antimicrobial resistance [@nhsengl2022].
+
+#### Existing dashboard
+
+Despite the importance of this issue to the Department of Health and Social Care and a stated desire for improved antibiotic monitoring systems[@policyp2019] , the only publicly available data detailing trends in the NHS is a standalone Excel dashboard that has to be downloaded [@antibiot2017]. As Excel is not principally design to create data dashboards there are a number of limitations, such as poor interactivity, all data has to be contained within the workbook which can lead to challenges regarding version control and the inability to have real-time data updates.
+
+#### Data-driven storytelling development
+
+Informed by conversations with experts in the field of antimicrobial resistance (AMR), I will develop a publicly facing data-driven story targeted for use by those in the NHS. I am a registered member of Contact, Help, Advice and Information Network (CHAIN), a network of people working in health and social care predominately in England [@chain2022]. It includes a sub-group on AMR. Through this network I have posted a request to have informal conversations with experts to identify and help inform both the likely narrative structure and interactive visuals of interest to my target readership. Items of interest will be guided by the data availability in NHSBSA's Open Data Portal. I will then use the R package scrollytell [@rpackag2018], to develop the data-driven story on antibiotic prescribing in England. Using the insight that I will have gained from the AMR thematic experts I will place a selection of visual outputs, that may include graphs and maps in relation to temporal and geographical figures of antibiotic prescribing in a structured narrative. If desired and feasible to create the appropriate data linkages, I may also include reporting of prescribing behaviour in relation to demographic factors such as age as well as disease prevalence.
+
+#### Evaluation
+
+The research contribution from my project will come from the evaluation. I have allocated four weeks to develop an evaluation plan (see Gantt chart). From my reading of the literature so far, this is likely to consist of either heuristic evaluation or usability testing. Heuristic evaluation is an inspection method that would require a small number of expert evaluators familiar with recognised usability principles [@markc.schall2015; @nielsen1990; @gonzález2009]. Whereas usability testing, asks a set of tool end users to carry out a series of tasks in order to identify usability issues [@paz2015].
+
+## Aim
+
+To understand the value of a data-driven story on antibiotic prescribing to experts and decision makers working in antimicrobial resistance in England.
+
+### Objectives
+
+1.  Engage with AMR experts to understand what are the key items of importance in decision making in relation to antibiotic prescribing.
+2.  Create a data-driven story on antibiotic prescribing in England.
+3.  Formulate an evaluation plan detailing method and type of data capture as well as participant recruitment.
+4.  Recruit a suitable sample of participants for the evaluation.
+5.  Deliver the evaluation.
+6.  Analyse the results of the evaluation.
+7.  Write up the final report.
+
+## Progress
+
+#### Data-driven story development
+
+I have familiarised myself with data relating to antibiotic prescribing that is available through NHSBSA's Open Data Portal [@welcome2022]. I have spent time using and understanding the only currently available NHS data dashboard on prescribing trends in England [@antibiot2017]. I have prior knowledge and experience of creating tools with scrollytell. Therefore I have the technical expertise to create the data-driven tool.
+
+#### AMR expert engagement
+
+On 1 June 2022, I sent out a request to 239 registered to the CHAIN sub-group on AMR for informal conversations to help me gain an improved thematic understanding of antibiotic prescribing [@chain2022]. I have received a positive response from the chair of the CHAIN group and I am currently arranging my first conversations. I am optimistic that I will obtain sufficient engagement to develop the initial tool. However, further contacts are possible either through my employer (NHSBSA), or through direct contact with CCGs [@nhsengl2022a].
+
+#### Evalulation planning
+
+On 1 June 2022, I discussed potential evaluation methods with my supervisor, Dr Alma Cantu. Due to the time constraints and broad spectrum of potential methods that could be applied, we decided to focus on quantitative usability testing methods. I have read a number of references and I am developing an understanding of specific techniques and evaluation tools such as: system usability scales, AttrakDiff and VisAWI. However, the specific method(s) will be chosen once the data-driven story has progressed further when the structure and format of the tool is better known.
+
+```{r echo=FALSE, fig.height=3, fig.width=8, warning=FALSE}
+
+g <- new("gantt")
+g <- ganttAddTask(g, "Engage with AMR experts", "2022-06-01","2022-06-27", done = 0)
+g <- ganttAddTask(g, "Create data-driven story", "2022-06-13","2022-07-11", done = 0)
+g <- ganttAddTask(g, "Formulate evalulation plan", "2022-06-13","2022-07-11", done = 0)
+g <- ganttAddTask(g, "Study recruitment", "2022-07-11","2022-08-01", done = 0)
+g <- ganttAddTask(g, "Deliver evaluation", "2022-07-11","2022-08-08", done = 0)
+g <- ganttAddTask(g, "Data analysis", "2022-07-25","2022-08-15", done = 0)
+g <- ganttAddTask(g, "Write report", "2022-06-20","2022-08-29", done = 0)
+g <- ganttAddTask(g, "Annual leave", "2022-08-08","2022-08-22", done = 0)
+
+plot(g, main = "Project plan Gantt chart, based on stated objectives",
+     time.labels.by = "1 weeks", time.lines.by = "1 week", axes = TRUE )
+
+```
+
+### Reference
