@@ -12,12 +12,12 @@ mod_intro_antibiotic_ui <- function(id) {
   tagList(
     h2_tabstop("England Overview"),
     p(
-      "Visualisation 1",
-      "Two SOF indicators;",
+      "SOF indicators;",
       tags$ul(
         tags$li("44a Anti-microbial resistance: total prescribing of antibiotics in primary care"),
         tags$li("46b Anti-microbial resistance: proportion of broad-spectrum antibiotic prescribing in primary care")
       ),
+      tags$text("TEXT ADD"),
       tags$div(
         style = "margin-top: 25vh" # add some buffer space after the chart
       ),
@@ -54,6 +54,7 @@ mod_intro_antibiotic_ui <- function(id) {
             tags$div(style = "height: 30vh"), # bump text from top of section
             h4_tabstop("Antibiotic items star-pu in England"),
             p("England items STAR-PU")
+            # tags$div(style = "height: 20vh"), # bump text from bottom of last section
           ),
           scrollytell::scrolly_section(
             id = "ENG_46b",

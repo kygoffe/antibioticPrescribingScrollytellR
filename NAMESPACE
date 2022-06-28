@@ -2,9 +2,6 @@
 
 export("%>%")
 export(fa_to_png_to_datauri)
-export(fit_lm_poly)
-export(fit_lm_poly_outliers)
-export(fit_lm_poly_vals)
 export(run_app)
 export(theme_nhsbsa)
 export(tippy)

@@ -28,7 +28,8 @@ Imports:
     sf,
     janitor,
     reactable,
-    plan
+    plan,
+    rsvg
 Remotes:
     nhsbsa-data-analytics/nhsbsaR
     statistiekcbs/scrollytell

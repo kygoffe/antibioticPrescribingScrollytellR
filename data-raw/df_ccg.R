@@ -31,16 +31,22 @@ ccg <- ccg |>
     CCG_NAME == "Bristol, North Somerset and S Glos" ~ "Bristol, North Somerset and South Gloucestershire",
     CCG_NAME == "Hampshire,Southampton andIsle of Wight" ~ "Hampshire, Southampton and Isle of Wight",
     CCG_NAME == "Se Staffs and Seisdon Peninsular" ~ "South East Staffordshire and Seisdon Peninsula",
+    CCG_NAME == "Stoke On Trent" ~ "Stoke on Trent",
     TRUE ~ CCG_NAME
   )) |>
   mutate(
     REGION = stringr::str_to_title(REGION),
     REGION = gsub("And", "and", REGION),
     REGION = gsub("Of", "of", REGION)
-  ) %>%  
+  ) %>%
   mutate(
     STP_NAME = trimws(STP_NAME)
-  )
+  ) %>%
+  rename(
+    SUB_GEOGRAPHY_NAME = CCG_NAME
+  ) %>%
+  mutate(SUB_GEOGRAPHY_TYPE = "CCG") %>%
+  select(REGION, SUB_GEOGRAPHY_NAME, SUB_GEOGRAPHY_TYPE, YEAR_MONTH, METRIC, VALUE)
 
 
 usethis::use_data(ccg, overwrite = TRUE)

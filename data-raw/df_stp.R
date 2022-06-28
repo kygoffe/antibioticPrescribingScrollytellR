@@ -24,7 +24,27 @@ stp <- stp |>
   ) %>%
   mutate(
     STP_NAME = trimws(STP_NAME)
-  )
+  ) %>%
+  mutate(
+    SUB_GEOGRAPHY_NAME = STP_NAME,
+    SUB_GEOGRAPHY_TYPE = "STP"
+  ) %>%
+  select(REGION, SUB_GEOGRAPHY_NAME, SUB_GEOGRAPHY_TYPE, YEAR_MONTH, METRIC, VALUE)
+
+
+# Merge ccg and stp (I have put this one inside the mod but too slow render so moved here)
+merge_df <- dplyr::bind_rows(
+  antibioticPrescribingScrollytellR::ccg,
+  antibioticPrescribingScrollytellR::stp
+) %>%
+  mutate(MEET_TARGET = case_when(
+    METRIC == "STARPU" & VALUE <= 0.871 ~ 1,
+    METRIC == "COAMOX" & VALUE <= 10 ~ 1,
+    METRIC == "ITEMS" ~ 99, # not relevant
+    TRUE ~ 0 # not meet
+  ))
+
 
 
 usethis::use_data(stp, overwrite = TRUE)
+usethis::use_data(merge_df, overwrite = TRUE)

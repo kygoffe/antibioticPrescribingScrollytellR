@@ -12,12 +12,12 @@ mod_region_antibiotic_ui <- function(id) {
   tagList(
     h2_tabstop("Breakdown by geography"),
     p("The map and chart show antibiotic prescribing SOF metrics by selected region and drill down to CCG level."),
-
+    p("TEXT WILL BE ADDED"),
     # Chart: Select by Region as there are too many CCGs, click the CCG map
     # Show two charts; England, STP as reference line
 
     nhs_card(
-      heading = "Breakdown by geography",
+      heading = "Antimicrobial Stewardship data reporting against NHS AMR metrics",
       # two drop down menu
       nhs_grid_3_col(
         nhs_selectInput(
@@ -31,48 +31,46 @@ mod_region_antibiotic_ui <- function(id) {
         nhs_selectInput(
           inputId = ns("region"),
           label = "Region",
-          choices = c(sort(unique(ccg$REGION[ccg$REGION != "England"]))), # Exclude England
+          choices = c("All", sort(unique(antibioticPrescribingScrollytellR::region_stp_ccg_lookup$REGION))),
           full_width = TRUE
         ),
         nhs_selectInput(
           inputId = ns("stp_ccg_sel"),
-          label = "Sub geography",
+          label = "Geography",
           choices = c(
-            "STP/ICS" = "STP_NAME", 
-            "CCG" = "CCG_NAME"
-            ), 
+            "STP/ICS" = "STP",
+            "CCG" = "CCG"
+          ),
+          # selected = "STP/ICS",
           full_width = TRUE
         )
       ),
+
       # map
       highcharter::highchartOutput(
-        outputId = ns("map_metric"),
-        height = "300px"
+        outputId = ns("map_chart"),
+        height = "400px"
       ),
       nhs_grid_2_col(
-        # either STP or CCG trend chart 
+        # trend chart depends on the clicked geography
         highcharter::highchartOutput(
-          outputId = ns("map_region_ccg"),
+          outputId = ns("sof_compare"),
           height = "300px"
         ),
-        # selected CCG trend
         highcharter::highchartOutput(
-          outputId = ns("ccg_trend"),
+          outputId = ns("sof_trend"),
           height = "300px"
         )
       ),
-      shiny::htmlOutput(ns("ccg_comment"))
-    ),
-    p("Dynamic text about the selected CCG"),
-    nhs_card(
-      highcharter::highchartOutput(
-        outputId = ns("gp_count"),
-        height = "400px"
+      tags$text(
+        class = "highcharts-caption",
+        style = "font-size: 9pt",
+        "Selected 12 months rolling period to March 2022"
       ),
-      highcharter::highchartOutput(
-        outputId = ns("gp_imd"),
-        height = "400px"
-      )
+      mod_nhs_download_ui(id = ns("map_sof_download"))
+    ),
+    tags$div(
+      style = "margin-top: 25vh" # add some buffer space after the chart
     )
   )
 }
@@ -83,61 +81,228 @@ mod_region_antibiotic_ui <- function(id) {
 mod_region_antibiotic_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
-    # Filter data for selected geography and metrics
-    
+
     geography_df <- reactive({
       req(input$region)
       req(input$stp_ccg_sel)
       req(input$metric)
-      
-      # Two choices of geographies
-      if(input$stp_ccg_sel == "STP_NAME"){
-        antibioticPrescribingScrollytellR::stp %>% 
-          dplyr::filter(REGION == input$region) %>% 
-          dplyr::filter(METRIC == input$metric)
-      }else{
-        antibioticPrescribingScrollytellR::ccg %>% 
-          dplyr::filter(REGION == input$region) %>% 
-          dplyr::filter(METRIC == input$metric)
+
+      # Three choices of geographies
+      if (input$region == "All" & input$stp_ccg_sel == "STP") {
+        antibioticPrescribingScrollytellR::merge_df %>%
+          dplyr::filter(REGION != "England") %>%
+          dplyr::filter(SUB_GEOGRAPHY_TYPE == "STP") %>%
+          dplyr::filter(METRIC == input$metric) %>%
+          dplyr::filter(YEAR_MONTH == "Mar_22")
+      } else if (input$region == "All" & input$stp_ccg_sel == "CCG") {
+        antibioticPrescribingScrollytellR::merge_df %>%
+          dplyr::filter(REGION != "England") %>%
+          dplyr::filter(SUB_GEOGRAPHY_TYPE == "CCG") %>%
+          dplyr::filter(METRIC == input$metric) %>%
+          dplyr::filter(YEAR_MONTH == "Mar_22")
+      } else if (input$region != "All" & input$stp_ccg_sel == "STP") {
+        antibioticPrescribingScrollytellR::merge_df %>%
+          dplyr::filter(REGION == input$region) %>%
+          dplyr::filter(SUB_GEOGRAPHY_TYPE == "STP") %>%
+          dplyr::filter(METRIC == input$metric) %>%
+          dplyr::filter(YEAR_MONTH == "Mar_22")
+      } else {
+        antibioticPrescribingScrollytellR::merge_df %>%
+          dplyr::filter(REGION == input$region) %>%
+          dplyr::filter(SUB_GEOGRAPHY_TYPE == "CCG") %>%
+          dplyr::filter(METRIC == input$metric) %>%
+          dplyr::filter(YEAR_MONTH == "Mar_22")
       }
     })
-    
-    output$map_region_ccg <- highcharter::renderHighchart({
-      highcharter::highchart() %>% 
+
+    # observe(print(geography_df()))
+
+
+    map_list <- reactive({
+      req(input$region)
+      req(input$stp_ccg_sel)
+
+      if (input$region == "All") {
+        antibioticPrescribingScrollytellR::map_df %>%
+          dplyr::filter(GEOGRAPHY == input$stp_ccg_sel) %>%
+          geojsonsf::sf_geojson() %>%
+          jsonlite::fromJSON(simplifyVector = FALSE)
+      } else {
+        antibioticPrescribingScrollytellR::map_df %>%
+          dplyr::filter(GEOGRAPHY == input$stp_ccg_sel & REGION == input$region) %>%
+          geojsonsf::sf_geojson() %>%
+          jsonlite::fromJSON(simplifyVector = FALSE)
+      }
+    })
+
+    output$map_chart <- highcharter::renderHighchart({
+      req(input$metric)
+      req(input$stp_ccg_sel)
+
+      highcharter::highchart() %>%
         highcharter::hc_add_series_map(
-          if(input$stp_ccg_sel == "STP_NAME"){
-            map = antibioticPrescribingScrollytellR::stp_map 
-          }
-          
+          df = geography_df(),
+          map = map_list(),
+          joinBy = "SUB_GEOGRAPHY_NAME",
+          value = "MEET_TARGET",
+          allowPointSelect = TRUE,
+          cursur = "pointer",
+          # states = list(
+          #   hover = list(color = '#768692'),
+          #   select = list(color = '#768692',
+          #                 borderColor = 'black',
+          #                 dashStyle = 'dot')
+          # ),
+          borderColor = "black",
+          borderWidth = 0.2,
+          tooltip = list(
+            headerFormat = "",
+            pointFormat = paste0(
+              "<b>", input$stp_ccg_sel, ":</b> {point.SUB_GEOGRAPHY_NAME}<br> <b>",
+              switch(input$metric,
+                "STARPU" = "Antibacterial items/STAR PU (March 2022):</b> {point.VALUE:.2f}",
+                "COAMOX" = "Co-amoxiclav, Cephalosporins & Quinolones (March 2022): </b> {point.VALUE:.2f}%"
+              )
+            )
+          )
+        ) %>%
+        theme_nhsbsa() %>%
+        # highcharter::hc_colorAxis(
+        #   # min = switch(input$metric, "STARPU" = 0.86,
+        #   #              "COAMOX" = 9.99)) %>%
+        #   min = 0,
+        #   max = 1
+        # ) %>%
+        highcharter::hc_colorAxis(
+          dataClassColor = "category",
+          dataClasses = list(
+            list(from = 0, to = 0, color = "#ED8B00", name = "MEET_TARGET"),
+            list(from = 1, to = 1, color = "#E8EDEE", name = "MEET_TARGET")
+          )
+        ) %>%
+        highcharter::hc_legend(enabled = FALSE) %>%
+        highcharter::hc_plotOptions(
+          map = list(
+            events = list(
+              click = htmlwidgets::JS(
+                paste0(
+                  "
+                function(event) {
+                  Shiny.setInputValue('", id, "-mapclick_sof', event.point.SUB_GEOGRAPHY_NAME);
+                }
+                "
+                )
+              )
+            )
+          )
         )
     })
-    
-    
-    # observe(print(geography_df()))
-    
 
-    # observeEvent(
-    #   eventExpr = geography_df(),
-    #   handlerExpr = {
-    #     freezeReactiveValue(input, "stp")
-    #     updateSelectInput(
-    #       inputId = "stp",
-    #       choices = geography_df()$STP_NAME %>% 
-    #         na.omit() %>% 
-    #         unique()
-    #     )
-    #   }
-    # )
-    
-    
-    # data for map
-      
-    
-    
-    
-    
-    
+    # Trend chart
+    observeEvent(input$mapclick_sof, {
+      output$sof_trend <- highcharter::renderHighchart({
+        req(input$mapclick_sof)
+
+
+        reference_value <- switch(input$metric,
+          "STARPU" = 0.87,
+          "COAMOX" = 10
+        )
+
+        # add min, max value (28062022)
+
+
+        # define the dataset for the selected geography
+        antibioticPrescribingScrollytellR::merge_df %>%
+          dplyr::filter(SUB_GEOGRAPHY_NAME == input$mapclick_sof &
+            SUB_GEOGRAPHY_TYPE == input$stp_ccg_sel &
+            METRIC == input$metric) %>%
+          highcharter::hchart(
+            type = "line",
+            highcharter::hcaes(
+              x = YEAR_MONTH,
+              y = VALUE
+            )
+          ) %>%
+          theme_nhsbsa() %>%
+          highcharter::hc_title(
+            text = glue::glue({
+              input$mapclick_sof
+            })
+          ) %>%
+          highcharter::hc_yAxis(
+            title = list(
+              text = "12 rolling month trend",
+              align = "middle"
+            ),
+            plotLines = list(list(
+              value = reference_value, color = "#8A1538", width = 1,
+              dashStyle = "shortdash"
+            )),
+            labels = list(format = switch(input$metric,
+              "STARPU" = "{value:.2f}",
+              "COAMOX" = "{value:.2f}%"
+            ))
+          ) %>%
+          highcharter::hc_xAxis(
+            categories = antibioticPrescribingScrollytellR::merge_df$YEAR_MONTH,
+            title = list(text = "Year month")
+          )
+      })
+    })
+
+    # All : show by region number of SOF/CCG met/not met the target
+    # selected geography: show each STP/CCG to
+    # Take geography_df() and group by count
+
+
+    geography_compare_df <- reactive({
+      if (input$stp_ccg_sel == "STP") {
+        antibioticPrescribingScrollytellR::merge_df %>%
+          dplyr::filter(REGION != "England") %>%
+          dplyr::filter(SUB_GEOGRAPHY_TYPE == "STP") %>%
+          dplyr::filter(METRIC == input$metric) %>%
+          dplyr::filter(YEAR_MONTH == "Mar_22") %>%
+          dplyr::group_by(REGION) %>%
+          dplyr::summarise(
+            MEET = sum(MEET_TARGET),
+            NOT_MEET = dplyr::n() - sum(MEET_TARGET)
+          )
+      } else if (input$stp_ccg_sel == "CCG") {
+        antibioticPrescribingScrollytellR::merge_df %>%
+          dplyr::filter(REGION != "England") %>%
+          dplyr::filter(SUB_GEOGRAPHY_TYPE == "CCG") %>%
+          dplyr::filter(METRIC == input$metric) %>%
+          dplyr::filter(YEAR_MONTH == "Mar_22") %>%
+          dplyr::group_by(REGION) %>%
+          dplyr::summarise(
+            MEET = sum(MEET_TARGET),
+            NOT_MEET = dplyr::n() - sum(MEET_TARGET)
+          )
+      }
+    })
+
+    observe(print(geography_compare_df()))
+
+    output$sof_compare <- highcharter::renderHighchart({
+
+      # highchart plot
+      highcharter::highchart() %>%
+        highcharter::hc_chart(type = "column") %>%
+        highcharter::hc_plotOptions(column = list(stacking = "normal")) %>%
+        highcharter::hc_xAxis(categories = geography_compare_df()$REGION) %>%
+        highcharter::hc_add_series(
+          name = "Meet",
+          data = geography_compare_df()$MEET,
+          stack = "Not meet target"
+        ) %>%
+        highcharter::hc_add_series(
+          name = "Not Meet",
+          data = geography_compare_df()$NOT_MEET,
+          stack = "Not meet target"
+        ) %>%
+        theme_nhsbsa()
+    })
   })
 }
 
