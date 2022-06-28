@@ -65,8 +65,7 @@ mod_region_antibiotic_ui <- function(id) {
       tags$text(
         class = "highcharts-caption",
         style = "font-size: 9pt",
-        "Selected 12 months rolling period to March 2022"
-      ),
+        "Selected 12 months rolling period to March 2022. Click map to see trend by selected geography."),
       mod_nhs_download_ui(id = ns("map_sof_download"))
     ),
     tags$div(
@@ -210,7 +209,17 @@ mod_region_antibiotic_server <- function(id) {
         )
 
         # add min, max value (28062022)
-
+        max_val <- reactive({
+          antibioticPrescribingScrollytellR::merge_df %>% 
+          dplyr::filter(METRIC == input$metric & 
+                          SUB_GEOGRAPHY_TYPE == input$stp_ccg_sel) %>% 
+          dplyr::summarise(max(VALUE)) %>% 
+          dplyr::ungroup() %>% 
+          dplyr::pull()
+        })
+        
+        # observe(print(max_val()))  
+ 
 
         # define the dataset for the selected geography
         antibioticPrescribingScrollytellR::merge_df %>%
@@ -231,6 +240,8 @@ mod_region_antibiotic_server <- function(id) {
             })
           ) %>%
           highcharter::hc_yAxis(
+            min = 0,
+            max = max_val(),
             title = list(
               text = "12 rolling month trend",
               align = "middle"
@@ -240,8 +251,8 @@ mod_region_antibiotic_server <- function(id) {
               dashStyle = "shortdash"
             )),
             labels = list(format = switch(input$metric,
-              "STARPU" = "{value:.2f}",
-              "COAMOX" = "{value:.2f}%"
+              "STARPU" = "{value:.1f}",
+              "COAMOX" = "{value:.0f}%"
             ))
           ) %>%
           highcharter::hc_xAxis(

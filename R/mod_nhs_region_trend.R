@@ -10,11 +10,12 @@
 mod_nhs_region_trend_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2_tabstop("AMR long term trends"),
+    h2_tabstop("Long term trends"),
     p(
       "Antimicrobial resistance (AMR) is one of the biggest threats to global public health. ",
       "NHS antimicrobial activity since COVID-19 pandemic.",
-      "The first visualisation shows the total number of items in the seven NHS England regions"
+      "The first visualisation shows the total number of items in the seven NHS England regions",
+      "Drilldown to CCG and GP practice? (GP practice data will download from open data portal API)"
     ),
     p(
       "add text here"
