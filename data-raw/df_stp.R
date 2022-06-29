@@ -42,7 +42,13 @@ merge_df <- dplyr::bind_rows(
     METRIC == "COAMOX" & VALUE <= 10 ~ 1,
     METRIC == "ITEMS" ~ 99, # not relevant
     TRUE ~ 0 # not meet
-  ))
+  )) %>% 
+  mutate(
+    colour = case_when(METRIC == "STARPU" & VALUE <= 0.87 ~ "#41B6E6", # met target
+                       METRIC == "COAMOX" & VALUE <= 10 ~ "#41B6E6", # met target
+                       TRUE ~ "#ED8B00"
+                       )
+  )
 
 
 

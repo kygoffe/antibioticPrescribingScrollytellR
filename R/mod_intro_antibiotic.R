@@ -12,14 +12,16 @@ mod_intro_antibiotic_ui <- function(id) {
   tagList(
     h2_tabstop("England Overview"),
     p(
-      "SOF indicators;",
+      "System Oversight Framework (SOF) indicators to facilitate a safe reduction in overall ",
+      "antibiotic exposure by highlighting variation so ICS and CCGs can provide appropriate support ",
+      "to practices and primary care netrowks.",
       tags$ul(
         tags$li("44a Anti-microbial resistance: total prescribing of antibiotics in primary care"),
-        tags$li("46b Anti-microbial resistance: proportion of broad-spectrum antibiotic prescribing in primary care")
+        tags$li("46b Anti-microbial resistance: proportion of broad-spectrum antibiotic prescribing in primary care"),
       ),
-      tags$text("TEXT ADD"),
+      tags$text("[TEXT WILL BE ADDED]"),
       tags$div(
-        style = "margin-top: 25vh" # add some buffer space after the chart
+        style = "margin-top: 10vh" # add some buffer space after the chart
       ),
 
       # scrolly chart: England average (data source: ePACT2)
@@ -53,14 +55,18 @@ mod_intro_antibiotic_ui <- function(id) {
             id = "ENG_44a",
             tags$div(style = "height: 30vh"), # bump text from top of section
             h4_tabstop("Antibiotic items star-pu in England"),
-            p("England items STAR-PU")
-            # tags$div(style = "height: 20vh"), # bump text from bottom of last section
+            p("Antibiotic prescribing in the community in England has been decreasing. ",
+              "However, pandemic has resulted in an increase in the precautionary prescribing ",
+              "of antibiotics due to concerns about bacterial co-infction"),
+            tags$div(style = "height: 20vh"), # bump text from bottom of last section
           ),
           scrollytell::scrolly_section(
             id = "ENG_46b",
             tags$div(style = "height: 10vh"), # bump text from top of section,
             h4_tabstop("Antibiotic 10% over the broad antibiotics in England"),
-            p("comments on 10% of broad antibiotics"),
+            p("Reduction in the proportion of broad spectrum antibiotics (namely co-amoxiclav,
+              cephalosporins and quinolones) prescribed in primary care ",
+              "The aim if not exceeds 10% of all antibiotics prescribed within a GP practice."),
             tags$div(style = "height: 20vh"), # bump text from bottom of last section
           )
         )
@@ -96,10 +102,10 @@ mod_intro_antibiotic_server <- function(id) {
       req(input$england_scrolly)
 
       if (input$england_scrolly == "ENG_44a") {
-        df <- antibioticPrescribingScrollytellR::eng_trend |>
+        df <- antibioticPrescribingScrollytellR::eng_trend %>%
           dplyr::select(YEAR_MONTH, LINE = STAR_PU, COL = TOTAL_ITEMS)
       } else {
-        df <- antibioticPrescribingScrollytellR::eng_trend |>
+        df <- antibioticPrescribingScrollytellR::eng_trend %>%
           dplyr::select(YEAR_MONTH, LINE = COAMOX, COL = TOTAL_COAMOX)
       }
 
@@ -114,8 +120,8 @@ mod_intro_antibiotic_server <- function(id) {
       )
 
 
-      highcharter::highchart() |>
-        highcharter::hc_xAxis(categories = unique(df$YEAR_MONTH)) |>
+      highcharter::highchart() %>%
+        highcharter::hc_xAxis(categories = unique(df$YEAR_MONTH)) %>%
         highcharter::hc_yAxis_multiples(
           list(title = list(text = "Number of items"), lineWidth = 1, opposite = FALSE),
           list(
@@ -126,17 +132,17 @@ mod_intro_antibiotic_server <- function(id) {
               dashStyle = "shortdash"
             ))
           )
-        ) |>
+        ) %>%
         highcharter::hc_add_series(
           data = df$COL, type = "column", yAxis = 0, showInLegend = FALSE,
           name = "Number of items"
-        ) |>
+        ) %>%
         highcharter::hc_add_series(
           data = round(df$LINE, digit = 2), type = "line", yAxis = 1,
           showInLegend = FALSE,
           name = yaxis_text1
-        ) |>
-        theme_nhsbsa() |>
+        ) %>%
+        theme_nhsbsa() %>%
         highcharter::hc_tooltip(
           shared = TRUE,
           useHTML = TRUE

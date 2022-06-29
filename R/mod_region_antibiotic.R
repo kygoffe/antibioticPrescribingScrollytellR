@@ -146,12 +146,6 @@ mod_region_antibiotic_server <- function(id) {
           value = "MEET_TARGET",
           allowPointSelect = TRUE,
           cursur = "pointer",
-          # states = list(
-          #   hover = list(color = '#768692'),
-          #   select = list(color = '#768692',
-          #                 borderColor = 'black',
-          #                 dashStyle = 'dot')
-          # ),
           borderColor = "black",
           borderWidth = 0.2,
           tooltip = list(
@@ -166,17 +160,11 @@ mod_region_antibiotic_server <- function(id) {
           )
         ) %>%
         theme_nhsbsa() %>%
-        # highcharter::hc_colorAxis(
-        #   # min = switch(input$metric, "STARPU" = 0.86,
-        #   #              "COAMOX" = 9.99)) %>%
-        #   min = 0,
-        #   max = 1
-        # ) %>%
         highcharter::hc_colorAxis(
           dataClassColor = "category",
           dataClasses = list(
             list(from = 0, to = 0, color = "#ED8B00", name = "MEET_TARGET"),
-            list(from = 1, to = 1, color = "#E8EDEE", name = "MEET_TARGET")
+            list(from = 1, to = 1, color = "#41B6E6", name = "MEET_TARGET")
           )
         ) %>%
         highcharter::hc_legend(enabled = FALSE) %>%
@@ -200,8 +188,23 @@ mod_region_antibiotic_server <- function(id) {
     # Trend chart
     observeEvent(input$mapclick_sof, {
       output$sof_trend <- highcharter::renderHighchart({
-        req(input$mapclick_sof)
 
+        req(input$mapclick_sof)
+        req(input$stp_ccg_sel)
+        req(input$metric)
+        
+        
+        plot_df <- reactive({antibioticPrescribingScrollytellR::merge_df %>%
+            dplyr::filter(SUB_GEOGRAPHY_NAME == input$mapclick_sof &
+                            SUB_GEOGRAPHY_TYPE == input$stp_ccg_sel &
+                            METRIC == input$metric
+            )})
+        
+        validate(
+          need(nrow(plot_df()) > 0, message = FALSE)
+        ) # stopping to show temporary error message.
+        
+        # observe(print(plot_df()))
 
         reference_value <- switch(input$metric,
           "STARPU" = 0.87,
@@ -219,20 +222,19 @@ mod_region_antibiotic_server <- function(id) {
         })
         
         # observe(print(max_val()))  
- 
+
 
         # define the dataset for the selected geography
-        antibioticPrescribingScrollytellR::merge_df %>%
-          dplyr::filter(SUB_GEOGRAPHY_NAME == input$mapclick_sof &
-            SUB_GEOGRAPHY_TYPE == input$stp_ccg_sel &
-            METRIC == input$metric) %>%
+        plot_df() %>% 
           highcharter::hchart(
-            type = "line",
+            type = "coloredline",
             highcharter::hcaes(
               x = YEAR_MONTH,
-              y = VALUE
+              y = VALUE,
+              segmentColor = colour
             )
           ) %>%
+          highcharter::hc_add_dependency("plugins/multicolor_series.js") %>% 
           theme_nhsbsa() %>%
           highcharter::hc_title(
             text = glue::glue({
@@ -256,8 +258,19 @@ mod_region_antibiotic_server <- function(id) {
             ))
           ) %>%
           highcharter::hc_xAxis(
-            categories = antibioticPrescribingScrollytellR::merge_df$YEAR_MONTH,
+            categories = unique(antibioticPrescribingScrollytellR::merge_df[,"YEAR_MONTH"]),
             title = list(text = "Year month")
+          ) %>% 
+          highcharter::hc_plotOptions(
+            line = list(marker = (list(enabled = FALSE)))
+          ) %>% 
+          highcharter::hc_tooltip(
+            shared = TRUE,
+            useHTML = TRUE,
+            pointFormat = switch(input$metric,
+                                 "STARPU" = "<b>{point.y:.2f}</b>",
+                                 "COAMOX" = "<b>{point.y:.1f}%</b>")
+            
           )
       })
     })
@@ -303,14 +316,14 @@ mod_region_antibiotic_server <- function(id) {
         highcharter::hc_plotOptions(column = list(stacking = "normal")) %>%
         highcharter::hc_xAxis(categories = geography_compare_df()$REGION) %>%
         highcharter::hc_add_series(
-          name = "Meet",
+          name = "Met",
           data = geography_compare_df()$MEET,
-          stack = "Not meet target"
+          stack = "Not met target"
         ) %>%
         highcharter::hc_add_series(
-          name = "Not Meet",
+          name = "Not Met",
           data = geography_compare_df()$NOT_MEET,
-          stack = "Not meet target"
+          stack = "Not met target"
         ) %>%
         theme_nhsbsa()
     })

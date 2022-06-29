@@ -14,14 +14,14 @@ mod_nhs_region_trend_ui <- function(id) {
     p(
       "Antimicrobial resistance (AMR) is one of the biggest threats to global public health. ",
       "NHS antimicrobial activity since COVID-19 pandemic.",
-      "The first visualisation shows the total number of items in the seven NHS England regions",
+      "The first visualisation shows the total number of items in the NHS England regions",
       "Drilldown to CCG and GP practice? (GP practice data will download from open data portal API)"
     ),
     p(
       "add text here"
     ),
     nhs_card(
-      heading = "Number of monthly antibiotic items (BNF 5.1) prescribed by NHS region",
+      heading = "Number of monthly antibiotic items prescribed by NHS region",
       nhs_grid_2_col(
         nhs_selectInput(
           inputId = ns("region"),
