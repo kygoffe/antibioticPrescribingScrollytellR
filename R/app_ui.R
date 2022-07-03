@@ -44,15 +44,10 @@ app_ui <- function(request) {
           fluid = FALSE,
           tabPanel(
             title = "Article",
-            mod_intro_antibiotic_ui("intro_antibiotic_1"),
-            mod_region_antibiotic_ui("region_antibiotic_1"),
-            mod_nhs_region_trend_ui("nhs_region_trend_1")
-            # mod_s07_copd_ui("s07_copd_ui_1"),
-            # mod_s08_saba_ui("s08_saba_ui_1")
-          ),
-          tabPanel(
-            title = "Definitions",
-            # mod_definitions_ui("definitions_1")
+            mod_intro_antibiotic_ui("intro_antibiotic_1") # ,
+            # mod_region_antibiotic_ui("region_antibiotic_1"),
+            # mod_nhs_region_trend_ui("nhs_region_trend_1"),
+            # New try
           )
         ),
         # reset vertical scroll bar when clicking tabpanel link

@@ -65,7 +65,8 @@ mod_region_antibiotic_ui <- function(id) {
       tags$text(
         class = "highcharts-caption",
         style = "font-size: 9pt",
-        "Selected 12 months rolling period to March 2022. Click map to see trend by selected geography."),
+        "Selected 12 months rolling period to March 2022. Click map to see trend by selected geography."
+      ),
       mod_nhs_download_ui(id = ns("map_sof_download"))
     ),
     tags$div(
@@ -188,22 +189,22 @@ mod_region_antibiotic_server <- function(id) {
     # Trend chart
     observeEvent(input$mapclick_sof, {
       output$sof_trend <- highcharter::renderHighchart({
-
         req(input$mapclick_sof)
         req(input$stp_ccg_sel)
         req(input$metric)
-        
-        
-        plot_df <- reactive({antibioticPrescribingScrollytellR::merge_df %>%
+
+
+        plot_df <- reactive({
+          antibioticPrescribingScrollytellR::merge_df %>%
             dplyr::filter(SUB_GEOGRAPHY_NAME == input$mapclick_sof &
-                            SUB_GEOGRAPHY_TYPE == input$stp_ccg_sel &
-                            METRIC == input$metric
-            )})
-        
+              SUB_GEOGRAPHY_TYPE == input$stp_ccg_sel &
+              METRIC == input$metric)
+        })
+
         validate(
           need(nrow(plot_df()) > 0, message = FALSE)
         ) # stopping to show temporary error message.
-        
+
         # observe(print(plot_df()))
 
         reference_value <- switch(input$metric,
@@ -213,19 +214,19 @@ mod_region_antibiotic_server <- function(id) {
 
         # add min, max value (28062022)
         max_val <- reactive({
-          antibioticPrescribingScrollytellR::merge_df %>% 
-          dplyr::filter(METRIC == input$metric & 
-                          SUB_GEOGRAPHY_TYPE == input$stp_ccg_sel) %>% 
-          dplyr::summarise(max(VALUE)) %>% 
-          dplyr::ungroup() %>% 
-          dplyr::pull()
+          antibioticPrescribingScrollytellR::merge_df %>%
+            dplyr::filter(METRIC == input$metric &
+              SUB_GEOGRAPHY_TYPE == input$stp_ccg_sel) %>%
+            dplyr::summarise(max(VALUE)) %>%
+            dplyr::ungroup() %>%
+            dplyr::pull()
         })
-        
-        # observe(print(max_val()))  
+
+        # observe(print(max_val()))
 
 
         # define the dataset for the selected geography
-        plot_df() %>% 
+        plot_df() %>%
           highcharter::hchart(
             type = "coloredline",
             highcharter::hcaes(
@@ -234,7 +235,7 @@ mod_region_antibiotic_server <- function(id) {
               segmentColor = colour
             )
           ) %>%
-          highcharter::hc_add_dependency("plugins/multicolor_series.js") %>% 
+          highcharter::hc_add_dependency("plugins/multicolor_series.js") %>%
           theme_nhsbsa() %>%
           highcharter::hc_title(
             text = glue::glue({
@@ -258,19 +259,19 @@ mod_region_antibiotic_server <- function(id) {
             ))
           ) %>%
           highcharter::hc_xAxis(
-            categories = unique(antibioticPrescribingScrollytellR::merge_df[,"YEAR_MONTH"]),
+            categories = unique(antibioticPrescribingScrollytellR::merge_df[, "YEAR_MONTH"]),
             title = list(text = "Year month")
-          ) %>% 
+          ) %>%
           highcharter::hc_plotOptions(
             line = list(marker = (list(enabled = FALSE)))
-          ) %>% 
+          ) %>%
           highcharter::hc_tooltip(
             shared = TRUE,
             useHTML = TRUE,
             pointFormat = switch(input$metric,
-                                 "STARPU" = "<b>{point.y:.2f}</b>",
-                                 "COAMOX" = "<b>{point.y:.1f}%</b>")
-            
+              "STARPU" = "<b>{point.y:.2f}</b>",
+              "COAMOX" = "<b>{point.y:.1f}%</b>"
+            )
           )
       })
     })

@@ -44,7 +44,7 @@ mod_intro_antibiotic_ui <- function(id) {
             tags$text(
               class = "highcharts-caption",
               style = "font-size: 9pt",
-              "Calculation is based on CCG data and 12 months rolling period."
+              "Calculation is based on Sub ICB/CCG data and 12 months rolling period."
             ),
             mod_nhs_download_ui(id = ns("england_chart_download"))
           )
@@ -55,18 +55,22 @@ mod_intro_antibiotic_ui <- function(id) {
             id = "ENG_44a",
             tags$div(style = "height: 30vh"), # bump text from top of section
             h4_tabstop("Antibiotic items star-pu in England"),
-            p("Antibiotic prescribing in the community in England has been decreasing. ",
+            p(
+              "Antibiotic prescribing in the community in England has been decreasing. ",
               "However, pandemic has resulted in an increase in the precautionary prescribing ",
-              "of antibiotics due to concerns about bacterial co-infction"),
+              "of antibiotics due to concerns about bacterial co-infction"
+            ),
             tags$div(style = "height: 20vh"), # bump text from bottom of last section
           ),
           scrollytell::scrolly_section(
             id = "ENG_46b",
             tags$div(style = "height: 10vh"), # bump text from top of section,
             h4_tabstop("Antibiotic 10% over the broad antibiotics in England"),
-            p("Reduction in the proportion of broad spectrum antibiotics (namely co-amoxiclav,
+            p(
+              "Reduction in the proportion of broad spectrum antibiotics (namely co-amoxiclav,
               cephalosporins and quinolones) prescribed in primary care ",
-              "The aim if not exceeds 10% of all antibiotics prescribed within a GP practice."),
+              "The aim if not exceeds 10% of all antibiotics prescribed within a GP practice."
+            ),
             tags$div(style = "height: 20vh"), # bump text from bottom of last section
           )
         )
@@ -90,8 +94,8 @@ mod_intro_antibiotic_server <- function(id) {
 
       # Select two possible chart title based on scroll section input
       switch(input$england_scrolly,
-        "ENG_44a" = "Anti-microbial resistance: total prescribing of antibiotics in primary care",
-        "ENG_46b" = "Anti-microbial resistance: proportion of broad-spectrum antibiotic prescribing in primary care"
+        "ENG_44a" = "Antibacterial BNF 5.1 Items/STAR_PU England",
+        "ENG_46b" = "% Co-amoxiclav, Cephalosporins & Quinolones Items in England"
       )
     })
 
@@ -102,11 +106,11 @@ mod_intro_antibiotic_server <- function(id) {
       req(input$england_scrolly)
 
       if (input$england_scrolly == "ENG_44a") {
-        df <- antibioticPrescribingScrollytellR::eng_trend %>%
-          dplyr::select(YEAR_MONTH, LINE = STAR_PU, COL = TOTAL_ITEMS)
+        df <- antibioticPrescribingScrollytellR::df_eng %>%
+          dplyr::select(YEAR_MONTH, LINE = STAR_PU, COL = ITEMS)
       } else {
-        df <- antibioticPrescribingScrollytellR::eng_trend %>%
-          dplyr::select(YEAR_MONTH, LINE = COAMOX, COL = TOTAL_COAMOX)
+        df <- antibioticPrescribingScrollytellR::df_eng %>%
+          dplyr::select(YEAR_MONTH, LINE = COAMOX, COL = COAMOX_ITEMS)
       }
 
       yaxis_text1 <- switch(input$england_scrolly,
