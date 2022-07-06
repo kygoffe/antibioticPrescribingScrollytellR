@@ -3,6 +3,7 @@
 library(dplyr)
 library(purrr)
 library(stringr)
+library(readr)
 
 sub_icb_df <- list.files(
   path = "./data-raw/epact2/sub_icb_ccg",
@@ -31,5 +32,13 @@ sub_icb_df <- list.files(
     values_to = "VALUE"
   ) %>%
   mutate(YEAR_MONTH = gsub("_", "-", YEAR_MONTH))
+
+x <- c("May-21", "Jun-21", "Jul-21", "Aug-21", "Sep-21", "Oct-21", "Nov-21", "Dec-21", "Jan-22", "Feb-22", "Mar-22", "Apr-22")
+
+sub_icb_df <- sub_icb_df %>%
+  mutate(YEAR_MONTH = factor(YEAR_MONTH, levels = x)) %>%
+  arrange(YEAR_MONTH) %>%
+  mutate(YEAR_MONTH = as.character(YEAR_MONTH))
+
 
 usethis::use_data(sub_icb_df, overwrite = TRUE)

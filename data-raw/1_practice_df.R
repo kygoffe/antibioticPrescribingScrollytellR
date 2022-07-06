@@ -249,5 +249,44 @@ gp_merge_df <- gp_merge_df %>%
 gp_merge_df <- gp_merge_df %>%
   mutate(YEAR_MONTH = gsub("_", "-", YEAR_MONTH))
 
+# remove closed GP practices and extract GP code for attaching IMD
+
+gp_merge_df <- gp_merge_df %>%
+  dplyr::filter(!grepl(" C 01-", PRACTICE)) %>%
+  dplyr::filter(!grepl(" D 0", PRACTICE)) %>%
+  dplyr::filter(!grepl(" D 1", PRACTICE)) %>%
+  dplyr::filter(!grepl(" D 2", PRACTICE)) %>%
+  dplyr::filter(!grepl(" D 3", PRACTICE))
+
+gp_merge_df$PRACTICE_CODE_EXT <- sapply(stringr::str_extract_all(
+  gp_merge_df$PRACTICE,
+  "(?<=\\()[^)(]+(?=\\))"
+),
+paste0,
+collapse = ","
+)
+
+# cleaning to get proper GP code
+
+gp_merge_df <- gp_merge_df %>%
+  tidyr::separate(PRACTICE_CODE_EXT, c("PRACTICE_CODE1", "PRACTICE_CODE2"), sep = ",") %>%
+  mutate(PRACTICE_CODE = case_when(
+    !is.na(PRACTICE_CODE1) & is.na(PRACTICE_CODE2) ~ PRACTICE_CODE1,
+    !is.na(PRACTICE_CODE2) ~ PRACTICE_CODE2
+  )) %>%
+  select(-c(PRACTICE_CODE1, PRACTICE_CODE2))
+
+
+
+
+# read GP lookup contains IMD rank/decile
+gp_lookup <- readr::read_csv("./data-raw/gp_list.csv")
+
+gp_merge_df <- gp_merge_df %>%
+  left_join(
+    y = gp_lookup,
+    by = "PRACTICE_CODE"
+  )
+
 
 usethis::use_data(gp_merge_df, overwrite = TRUE)

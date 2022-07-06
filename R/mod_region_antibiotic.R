@@ -165,7 +165,7 @@ mod_region_antibiotic_server <- function(id) {
           dataClassColor = "category",
           dataClasses = list(
             list(from = 0, to = 0, color = "#ED8B00", name = "MEET_TARGET"),
-            list(from = 1, to = 1, color = "#41B6E6", name = "MEET_TARGET")
+            list(from = 1, to = 1, color = "#E8EDEE", name = "MEET_TARGET")
           )
         ) %>%
         highcharter::hc_legend(enabled = FALSE) %>%
@@ -190,22 +190,7 @@ mod_region_antibiotic_server <- function(id) {
     observeEvent(input$mapclick_sof, {
       output$sof_trend <- highcharter::renderHighchart({
         req(input$mapclick_sof)
-        req(input$stp_ccg_sel)
-        req(input$metric)
 
-
-        plot_df <- reactive({
-          antibioticPrescribingScrollytellR::merge_df %>%
-            dplyr::filter(SUB_GEOGRAPHY_NAME == input$mapclick_sof &
-              SUB_GEOGRAPHY_TYPE == input$stp_ccg_sel &
-              METRIC == input$metric)
-        })
-
-        validate(
-          need(nrow(plot_df()) > 0, message = FALSE)
-        ) # stopping to show temporary error message.
-
-        # observe(print(plot_df()))
 
         reference_value <- switch(input$metric,
           "STARPU" = 0.87,
@@ -226,16 +211,21 @@ mod_region_antibiotic_server <- function(id) {
 
 
         # define the dataset for the selected geography
-        plot_df() %>%
+        antibioticPrescribingScrollytellR::merge_df %>%
+          dplyr::filter(SUB_GEOGRAPHY_NAME == input$mapclick_sof &
+            SUB_GEOGRAPHY_TYPE == input$stp_ccg_sel &
+            METRIC == input$metric) %>%
+          dplyr::mutate(
+            MEET = ifelse(test = VALUE < reference_value, "Met the target", "Not met the target")
+          ) %>%
           highcharter::hchart(
-            type = "coloredline",
+            type = "line",
             highcharter::hcaes(
               x = YEAR_MONTH,
               y = VALUE,
-              segmentColor = colour
+              group = MEET
             )
           ) %>%
-          highcharter::hc_add_dependency("plugins/multicolor_series.js") %>%
           theme_nhsbsa() %>%
           highcharter::hc_title(
             text = glue::glue({
@@ -259,19 +249,8 @@ mod_region_antibiotic_server <- function(id) {
             ))
           ) %>%
           highcharter::hc_xAxis(
-            categories = unique(antibioticPrescribingScrollytellR::merge_df[, "YEAR_MONTH"]),
+            categories = antibioticPrescribingScrollytellR::merge_df$YEAR_MONTH,
             title = list(text = "Year month")
-          ) %>%
-          highcharter::hc_plotOptions(
-            line = list(marker = (list(enabled = FALSE)))
-          ) %>%
-          highcharter::hc_tooltip(
-            shared = TRUE,
-            useHTML = TRUE,
-            pointFormat = switch(input$metric,
-              "STARPU" = "<b>{point.y:.2f}</b>",
-              "COAMOX" = "<b>{point.y:.1f}%</b>"
-            )
           )
       })
     })

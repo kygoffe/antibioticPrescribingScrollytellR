@@ -44,7 +44,9 @@ app_ui <- function(request) {
           fluid = FALSE,
           tabPanel(
             title = "Article",
-            mod_intro_antibiotic_ui("intro_antibiotic_1") # ,
+            mod_intro_antibiotic_ui("intro_antibiotic_1"),
+            mod_gp_overall_ui("gp_overall_1"),
+            mod_drug_list_ui("drug_list_1")
             # mod_region_antibiotic_ui("region_antibiotic_1"),
             # mod_nhs_region_trend_ui("nhs_region_trend_1"),
             # New try
