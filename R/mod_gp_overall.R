@@ -34,7 +34,7 @@ mod_gp_overall_ui <- function(id) {
         nhs_selectInput(
           inputId = ns("ccg"),
           label = "Sub ICB/CCG",
-          choices = c(sort(unique(antibioticPrescribingScrollytellR::sub_icb_df$SUB_ICB))),
+          choices = c(sort(unique(antibioticPrescribingScrollytellR::gp_merge_df$SUB_ICB_NAME))),
           full_width = TRUE
         ),
         nhs_selectInput(
@@ -48,23 +48,25 @@ mod_gp_overall_ui <- function(id) {
       # bar chart
       highcharter::highchartOutput(
         outputId = ns("bar_chart"),
-        height = "400px"
+        height = "250px"
       ),
       shiny::htmlOutput(ns("scatter_chart_text")),
       # scatterplot - practice starpu vs imd rank
       highcharter::highchartOutput(
         outputId = ns("scatter_chart"),
-        height = "400px"
+        height = "250px"
       ),
       shiny::htmlOutput(ns("trend_chart_text")),
       # trend chart
       highcharter::highchartOutput(
         outputId = ns("trend_chart"),
-        height = "400px"
+        height = "250px"
+      ),
+      tags$text(
+        class = "highcharts-caption",
+        style = "font-size: 9pt;",
+        "Walk-in centres are excluded from the charts."
       )
-    ),
-    tags$div(
-      style = "margin-top: 25vh" # add some buffer space after the chart
     )
   )
 }
@@ -82,7 +84,7 @@ mod_gp_overall_server <- function(id) {
       # req(input$ccg)
       antibioticPrescribingScrollytellR::gp_merge_df %>%
         dplyr::filter(YEAR_MONTH %in% "Apr-22") %>%
-        dplyr::filter(SUB_ICB %in% input$ccg) %>%
+        dplyr::filter(SUB_ICB_NAME %in% input$ccg) %>%
         dplyr::filter(METRIC %in% input$metric) %>%
         dplyr::mutate(IMD_RANK = as.numeric(IMD_RANK))
     })
@@ -93,7 +95,7 @@ mod_gp_overall_server <- function(id) {
       req(input$ccg)
       antibioticPrescribingScrollytellR::gp_merge_df %>%
         dplyr::filter(YEAR_MONTH %in% "Apr-22") %>%
-        dplyr::filter(SUB_ICB %in% input$ccg)
+        dplyr::filter(SUB_ICB_NAME %in% input$ccg)
     })
 
     # fill the name of GP
@@ -104,7 +106,7 @@ mod_gp_overall_server <- function(id) {
         updateSelectInput(
           inputId = "gp",
           choices =
-            unique(gp_list()$PRACTICE) %>%
+            unique(gp_list()$PRACTICE_NAME) %>%
               na.omit() %>%
               unique()
         )
@@ -119,9 +121,9 @@ mod_gp_overall_server <- function(id) {
       req(input$gp)
 
       gp_sel() %>%
-        dplyr::filter(PRACTICE %in% input$gp) %>%
+        dplyr::filter(PRACTICE_NAME %in% input$gp) %>%
         dplyr::select(YEAR_MONTH,
-          GEOGRAPHY = PRACTICE,
+          GEOGRAPHY = PRACTICE_NAME,
           VALUE
         )
     })
@@ -133,9 +135,9 @@ mod_gp_overall_server <- function(id) {
       antibioticPrescribingScrollytellR::sub_icb_df %>%
         dplyr::filter(YEAR_MONTH %in% "Apr-22") %>%
         dplyr::filter(METRIC %in% input$metric) %>%
-        dplyr::filter(SUB_ICB %in% input$ccg) %>%
+        dplyr::filter(SUB_ICB_NAME %in% input$ccg) %>%
         dplyr::select(YEAR_MONTH,
-          GEOGRAPHY = SUB_ICB,
+          GEOGRAPHY = SUB_ICB_NAME,
           VALUE
         )
     })
@@ -171,7 +173,7 @@ mod_gp_overall_server <- function(id) {
         dplyr::pull()
     })
 
-    observe(print(max_val()))
+    # observe(print(max_val()))
 
 
     # Create bar chart
@@ -191,7 +193,7 @@ mod_gp_overall_server <- function(id) {
         ) %>%
         theme_nhsbsa() %>%
         highcharter::hc_xAxis(
-          title = list(text = "12 months to:")
+          title = list(text = "12 months to April 2022")
         ) %>%
         highcharter::hc_yAxis(
           min = 0,
@@ -229,7 +231,7 @@ mod_gp_overall_server <- function(id) {
 
     # data for scatterplot
 
-    observe(print(gp_sel()$IMD_RANK)) # list of GPs in the selected CCG
+    # observe(print(gp_sel()$IMD_RANK)) # list of GPs in the selected CCG
 
 
     # Define IMD tooltip text
@@ -249,8 +251,8 @@ mod_gp_overall_server <- function(id) {
     # Tooltip text
     gp_tooltip_text <- reactive({
       paste0(
-        "<b>{point.PRACTICE}</b> <br>",
-        "<b>SUB ICB/CCG:</b> {point.SUB_ICB} <br>",
+        "<b>{point.PRACTICE_NAME}</b> <br>",
+        "<b>SUB ICB/CCG:</b> {point.SUB_ICB_NAME} <br>",
         "<b>IMD Decile:</b> {point.IMD_DECILE} <br>",
         "<b>2019 IMD rank (out of 32,844):</b> {point.IMD_RANK:,.0f} <br>",
         lsoa_metric_text()
@@ -269,7 +271,7 @@ mod_gp_overall_server <- function(id) {
       gp_scatter_chart <- gp_scatter_chart %>%
         highcharter::hc_add_series(
           data = gp_sel() %>%
-            dplyr::filter(PRACTICE == input$gp),
+            dplyr::filter(PRACTICE_NAME == input$gp),
           type = "scatter",
           highcharter::hcaes(
             x = IMD_RANK,
@@ -284,7 +286,7 @@ mod_gp_overall_server <- function(id) {
       gp_scatter_chart <- gp_scatter_chart %>%
         highcharter::hc_add_series(
           data = gp_sel() %>%
-            dplyr::filter(!PRACTICE == input$gp),
+            dplyr::filter(!PRACTICE_NAME == input$gp),
           type = "scatter",
           highcharter::hcaes(
             x = IMD_RANK,
@@ -333,10 +335,11 @@ mod_gp_overall_server <- function(id) {
 
       antibioticPrescribingScrollytellR::gp_merge_df %>%
         dplyr::filter(METRIC %in% input$metric) %>%
-        dplyr::filter(PRACTICE %in% input$gp) %>%
+        dplyr::filter(PRACTICE_NAME %in% input$gp) %>%
+        dplyr::filter(YEAR_MONTH != "Apr-21") %>%
         dplyr::select(
           YEAR_MONTH,
-          GEOGRAPHY = PRACTICE,
+          GEOGRAPHY = PRACTICE_NAME,
           VALUE
         ) %>%
         dplyr::mutate(
@@ -350,10 +353,11 @@ mod_gp_overall_server <- function(id) {
 
       antibioticPrescribingScrollytellR::sub_icb_df %>%
         dplyr::filter(METRIC %in% input$metric) %>%
-        dplyr::filter(SUB_ICB %in% input$ccg) %>%
+        dplyr::filter(SUB_ICB_NAME %in% input$ccg) %>%
+        dplyr::filter(YEAR_MONTH != "Apr-21") %>%
         dplyr::select(
           YEAR_MONTH,
-          GEOGRAPHY = SUB_ICB,
+          GEOGRAPHY = SUB_ICB_NAME,
           VALUE
         ) %>%
         dplyr::mutate(GEOGRAPHY_TYPE = "Sub ICB/CCG")
@@ -429,6 +433,17 @@ mod_gp_overall_server <- function(id) {
         )
       )
     })
+
+    gp_val <- reactive({
+      req(input$gp)
+
+      antibioticPrescribingScrollytellR::gp_merge_df %>%
+        dplyr::filter(PRACTICE_NAME == input$gp) %>%
+        dplyr::distinct(PRACTICE_CODE) %>%
+        dplyr::pull()
+    })
+
+    return(gp_val) # return the selected gp.......
   })
 }
 

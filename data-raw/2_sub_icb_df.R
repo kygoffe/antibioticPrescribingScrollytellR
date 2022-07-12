@@ -18,6 +18,8 @@ sub_icb_df <- list.files(
   select(
     YEAR_MONTH = file_name,
     SUB_ICB = sicbl,
+    STARPU_NUM = antibacterial_items_bnf_5_1,
+    STARPU_DENOM = oral_antibacterial_item_based_star_p_us,
     STAR_PU = antibacterial_items_per_star_pu,
     COAMOX = percent_co_amoxiclav_cephalosporins_quinolones_items,
     ICB = icb,
@@ -27,18 +29,33 @@ sub_icb_df <- list.files(
   relocate(ICB, .before = SUB_ICB) %>%
   relocate(REGION, .before = ICB) %>%
   tidyr::pivot_longer(
-    cols = !c(YEAR_MONTH:SUB_ICB),
+    cols = !c(YEAR_MONTH:STARPU_DENOM),
     names_to = "METRIC",
     values_to = "VALUE"
   ) %>%
   mutate(YEAR_MONTH = gsub("_", "-", YEAR_MONTH))
 
-x <- c("May-21", "Jun-21", "Jul-21", "Aug-21", "Sep-21", "Oct-21", "Nov-21", "Dec-21", "Jan-22", "Feb-22", "Mar-22", "Apr-22")
+x <- c("Apr-21", "May-21", "Jun-21", "Jul-21", "Aug-21", "Sep-21", "Oct-21", "Nov-21", "Dec-21", "Jan-22", "Feb-22", "Mar-22", "Apr-22")
 
 sub_icb_df <- sub_icb_df %>%
   mutate(YEAR_MONTH = factor(YEAR_MONTH, levels = x)) %>%
   arrange(YEAR_MONTH) %>%
   mutate(YEAR_MONTH = as.character(YEAR_MONTH))
+
+
+sub_icb_df <- sub_icb_df %>%
+  mutate(
+    SUB_ICB_CODE = sub(" *\\(.*", "", SUB_ICB),
+    SUB_ICB_CODE = trimws(stringr::str_replace(SUB_ICB_CODE, ".+-(.+)", "\\1"))
+  )
+
+
+# join with icb_lookup to keep the better name
+sub_icb_df <- sub_icb_df %>%
+  left_join(
+    y = icb_lookup,
+    by = "SUB_ICB_CODE"
+  )
 
 
 usethis::use_data(sub_icb_df, overwrite = TRUE)

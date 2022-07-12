@@ -2,120 +2,132 @@ library(dplyr)
 library(data.table)
 devtools::load_all()
 
-# Read 12 months of GP practice size data
-# append them
-# keep only if practices remained for whole 12 months
-# Based on other research papers, remove practices if size is too small etc
 
-april_2020 <- fread("https://files.digital.nhs.uk/98/764116/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP")
+may_2020 <- fread("https://files.digital.nhs.uk/7F/C526F5/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202005)
 
-may_2020 <- fread("https://files.digital.nhs.uk/7F/C526F5/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP")
+june_2020 <- fread("https://files.digital.nhs.uk/48/B12E95/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202006)
 
-june_2020 <- fread("https://files.digital.nhs.uk/48/B12E95/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP")
+july_2020 <- fread("https://files.digital.nhs.uk/7A/C3CD13/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202007)
 
-july_2020 <- fread("https://files.digital.nhs.uk/7A/C3CD13/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP")
+august_2020 <- fread("https://files.digital.nhs.uk/16/3B7597/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202008)
 
-august_2020 <- fread("https://files.digital.nhs.uk/16/3B7597/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP")
+september_2020 <- fread("https://files.digital.nhs.uk/07/D922F2/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202009)
 
-september_2020 <- fread("https://files.digital.nhs.uk/07/D922F2/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP")
+october_2020 <- fread("https://files.digital.nhs.uk/F4/728CF9/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202010)
 
-october_2020 <- fread("https://files.digital.nhs.uk/F4/728CF9/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP")
+november_2020 <- fread("https://files.digital.nhs.uk/01/6D3875/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202011)
 
-november_2020 <- fread("https://files.digital.nhs.uk/01/6D3875/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP")
+december_2020 <- fread("https://files.digital.nhs.uk/46/EFD4CB/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202012)
 
-december_2020 <- fread("https://files.digital.nhs.uk/46/EFD4CB/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP")
+january_2021 <- fread("https://files.digital.nhs.uk/01/C1E9D5/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202101)
 
-january_2021 <- fread("https://files.digital.nhs.uk/01/C1E9D5/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP")
+february_2021 <- fread("https://files.digital.nhs.uk/94/B835D4/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202102)
 
-february_2021 <- fread("https://files.digital.nhs.uk/94/B835D4/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP")
+march_2021 <- fread("https://files.digital.nhs.uk/9B/99C8B8/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE)) %>%
+  mutate(YEAR_MONTH = 202103)
 
-march_2021 <- fread("https://files.digital.nhs.uk/9B/99C8B8/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+april_2021 <- fread("https://files.digital.nhs.uk/9C/54B8FC/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE)) %>%
+  mutate(YEAR_MONTH = 202104)
 
-april_2021 <- fread("https://files.digital.nhs.uk/9C/54B8FC/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+may_2021 <- fread("https://files.digital.nhs.uk/A2/49CF7C/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE)) %>%
+  mutate(YEAR_MONTH = 202105)
 
-may_2021 <- fread("https://files.digital.nhs.uk/A2/49CF7C/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+june_2021 <- fread("https://files.digital.nhs.uk/79/FC50B1/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE)) %>%
+  mutate(YEAR_MONTH = 202106)
 
-june_2021 <- fread("https://files.digital.nhs.uk/79/FC50B1/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+july_2021 <- fread("https://files.digital.nhs.uk/EE/4EF23F/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE)) %>%
+  mutate(YEAR_MONTH = 202107)
 
-july_2021 <- fread("https://files.digital.nhs.uk/EE/4EF23F/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+august_2021 <- fread("https://files.digital.nhs.uk/2C/B12641/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE)) %>%
+  mutate(YEAR_MONTH = 202108)
 
-august_2021 <- fread("https://files.digital.nhs.uk/2C/B12641/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+september_2021 <- fread("https://files.digital.nhs.uk/31/618CE6/gp-reg-pat-prac-quin-age-v2.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE)) %>%
+  mutate(YEAR_MONTH = 202109)
 
-september_2021 <- fread("https://files.digital.nhs.uk/31/618CE6/gp-reg-pat-prac-quin-age-v2.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+october_2021 <- fread("https://files.digital.nhs.uk/02/231C6E/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE)) %>%
+  mutate(YEAR_MONTH = 202110)
 
-october_2021 <- fread("https://files.digital.nhs.uk/02/231C6E/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+november_2021 <- fread("https://files.digital.nhs.uk/AF/D1DC73/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE)) %>%
+  mutate(YEAR_MONTH = 202111)
 
-november_2021 <- fread("https://files.digital.nhs.uk/AF/D1DC73/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+december_2021 <- fread("https://files.digital.nhs.uk/52/E55571/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202112)
 
-december_2021 <- fread("https://files.digital.nhs.uk/52/E55571/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+january_2022 <- fread("https://files.digital.nhs.uk/61/55F8A6/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202201)
 
-january_2022 <- fread("https://files.digital.nhs.uk/61/55F8A6/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+february_2022 <- fread("https://files.digital.nhs.uk/7B/5C0583/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202202)
 
-february_2022 <- fread("https://files.digital.nhs.uk/7B/5C0583/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+march_2022 <- fread("https://files.digital.nhs.uk/98/EF683D/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202203)
 
-march_2022 <- fread("https://files.digital.nhs.uk/98/EF683D/gp-reg-pat-prac-quin-age.csv") |>
-  filter(ORG_TYPE == "GP") |>
-  mutate(EXTRACT_DATE = as.character(EXTRACT_DATE))
+april_2022 <- fread("https://files.digital.nhs.uk/CA/3F03AD/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202204)
 
-
-
-
-
-
-
-
-
+may_2022 <- fread("https://files.digital.nhs.uk/BC/22B544/gp-reg-pat-prac-quin-age.csv") %>%
+  filter(ORG_TYPE == "GP") %>%
+  mutate(YEAR_MONTH = 202204)
 
 
-# bind them and keep if GP practice appeared for whole 12 months
 
 gp_size <- bind_rows(
-  april_2020, may_2020, june_2020, july_2020, august_2020, september_2020,
+  may_2020, june_2020, july_2020, august_2020, september_2020,
   october_2020, november_2020, december_2020, january_2021, february_2021,
   march_2021, april_2021, may_2021, june_2021, july_2021, august_2021, september_2021,
-  october_2021, november_2021, december_2021, january_2022, february_2022, march_2022
+  october_2021, november_2021, december_2021, january_2022, february_2022, march_2022, april_2022
 )
+
+
 
 
 # Don't restrict, include all GP practices for STP and CCG
 
-gp_full_months <- gp_size |>
-  filter(SEX != "ALL" & AGE_GROUP_5 != "ALL") |> # exclude all as we don't need to use them
+gp_full_months <- gp_size %>%
+  filter(SEX != "ALL" & AGE_GROUP_5 != "ALL") %>% # exclude all as we don't need to use them
   mutate(STAR_PU_AGE_GROUP = case_when(
     AGE_GROUP_5 == "0_4" ~ "0_4",
     AGE_GROUP_5 == "5_9" ~ "5_14",
@@ -139,120 +151,138 @@ gp_full_months <- gp_size |>
     AGE_GROUP_5 == "95+" ~ "75+"
   ))
 
+usethis::use_data(gp_full_months, overwrite = TRUE)
 
 
-# # keep if practice last for 12 months
-#
-# gp_full_months <- gp_size |>
-#   semi_join(
-#     gp_size |> group_by(ORG_CODE) |>
-#       summarise(practice_count = n_distinct(EXTRACT_DATE)) |>
-#       ungroup() |>
-#       filter(practice_count == 12) |> # return 6,622 practices (6,801 total so lost 179 practices)
-#       select(ORG_CODE)
-#   )
-#
-#
-# gp_full_months <- gp_full_months |>
-#   semi_join(
-#     gp_full_months |>
-#       filter(SEX == "ALL") |>
-#       group_by(ORG_CODE) |>
-#       summarise(m = mean(NUMBER_OF_PATIENTS)) |>
-#       filter(m > 750) |> # ref: Wang K.Y, Molter paper (as these practices were assumed to be newly opened or about to be closed.)
-#       select(ORG_CODE)
-#   ) |> # lost further 53 practices (total of 6,569 practices are used)
-#   filter(SEX !='ALL' & AGE_GROUP_5 != 'ALL') |> # exclude all as we don't need to use them
-#   mutate(STAR_PU_AGE_GROUP = case_when(
-#     AGE_GROUP_5 == '0_4' ~ '0_4',
-#     AGE_GROUP_5 == '5_9' ~ '5_14',
-#     AGE_GROUP_5 == '10_14' ~ '5_14',
-#     AGE_GROUP_5 == '15_19' ~ '15_24',
-#     AGE_GROUP_5 == '20_24' ~ '15_24',
-#     AGE_GROUP_5 == '25_29' ~ '25_34',
-#     AGE_GROUP_5 == '30_34' ~ '25_34',
-#     AGE_GROUP_5 == '35_39' ~ '35_44',
-#     AGE_GROUP_5 == '40_44' ~ '35_44',
-#     AGE_GROUP_5 == '45_49' ~ '45_54',
-#     AGE_GROUP_5 == '50_54' ~ '45_54',
-#     AGE_GROUP_5 == '55_59' ~ '55_64',
-#     AGE_GROUP_5 == '60_64' ~ '55_64',
-#     AGE_GROUP_5 == '65_69' ~ '65_74',
-#     AGE_GROUP_5 == '70_74' ~ '65_74',
-#     AGE_GROUP_5 == '75_79' ~ '75+',
-#     AGE_GROUP_5 == '80_84' ~ '75+',
-#     AGE_GROUP_5 == '85_89' ~ '75+',
-#     AGE_GROUP_5 == '90_94' ~ '75+',
-#     AGE_GROUP_5 == '95+' ~ '75+'
-#   ))
-
-
-# Calculate STAR-PU for antibiotic items calculation (paper Pouwels )
+# Calculate STAR-PU for antibiotic items calculation (paper Pouwels has different weighting??)
+# Used https://www.england.nhs.uk/wp-content/uploads/2014/06/mo-dash-supp-info.pdf
 
 STAR_PU_AGE_GROUP <- c("0_4", "5_14", "15_24", "25_34", "35_44", "45_54", "55_64", "65_74", "75+")
 MALE <- c(0.8, 0.3, 0.3, 0.2, 0.3, 0.3, 0.4, 0.7, 1.0)
-FEMALE <- c(0.8, 0.4, 0.6, 0.6, 0.6, 0.6, 0.7, 1.0, 0.3)
+FEMALE <- c(0.8, 0.4, 0.6, 0.6, 0.6, 0.6, 0.7, 1.0, 1.3)
 
-star_pu <- data.frame(STAR_PU_AGE_GROUP, MALE, FEMALE) |>
+star_pu <- data.frame(STAR_PU_AGE_GROUP, MALE, FEMALE) %>%
   tidyr::pivot_longer(
     cols = c(MALE, FEMALE),
     names_to = "SEX",
     values_to = "STAR_PU"
   )
 
-gp_star_pu <- gp_full_months |>
+usethis::use_data(star_pu, overwrite = TRUE)
+
+gp_star_pu <- gp_full_months %>%
   inner_join(
     star_pu,
     by = c("STAR_PU_AGE_GROUP", "SEX")
-  ) |>
-  mutate(STAR_PU_PAT = NUMBER_OF_PATIENTS * STAR_PU) |>
-  group_by(EXTRACT_DATE, ORG_CODE) |>
-  summarise(GP_STAR_PU_PAT_TOTAL = sum(STAR_PU_PAT)) |>
-  ungroup() |>
-  mutate(
-    YEAR_MONTH = case_when(
-      EXTRACT_DATE == "01-Apr-20" ~ 202004,
-      EXTRACT_DATE == "01MAY2020" ~ 202005,
-      EXTRACT_DATE == "01JUN2020" ~ 202006,
-      EXTRACT_DATE == "01JUL2020" ~ 202007,
-      EXTRACT_DATE == "01AUG2020" ~ 202008,
-      EXTRACT_DATE == "01SEP2020" ~ 202009,
-      EXTRACT_DATE == "01OCT2020" ~ 202010,
-      EXTRACT_DATE == "01NOV2020" ~ 202011,
-      EXTRACT_DATE == "01DEC2020" ~ 202012,
-      EXTRACT_DATE == "01JAN2021" ~ 202101,
-      EXTRACT_DATE == "01FEB2021" ~ 202102,
-      EXTRACT_DATE == "2021-03-01" ~ 202103,
-      EXTRACT_DATE == "01APR2021" ~ 202104,
-      EXTRACT_DATE == "01MAY2021" ~ 202105,
-      EXTRACT_DATE == "01Jun2021" ~ 202106,
-      EXTRACT_DATE == "01Jul2021" ~ 202107,
-      EXTRACT_DATE == "01Aug2021" ~ 202108,
-      EXTRACT_DATE == "01Sep2021" ~ 202109,
-      EXTRACT_DATE == "01Oct2021" ~ 202110,
-      EXTRACT_DATE == "01Nov2021" ~ 202111,
-      EXTRACT_DATE == "01Dec2021" ~ 202112,
-      EXTRACT_DATE == "01Jan2022" ~ 202201,
-      EXTRACT_DATE == "01Feb2022" ~ 202202,
-      EXTRACT_DATE == "01Mar2022" ~ 202203
-    )
-  ) |>
+  ) %>%
+  mutate(STAR_PU_PAT = NUMBER_OF_PATIENTS * STAR_PU) %>%
+  group_by(YEAR_MONTH, ORG_CODE) %>%
+  summarise(GP_STAR_PU_PAT_TOTAL = sum(STAR_PU_PAT)) %>%
+  ungroup() %>%
   rename(PRACTICE_CODE = ORG_CODE)
 
-gp_star_pu_ccg_stp <- gp_star_pu |>
-  left_join(gp_ccg_stp, by = c("YEAR_MONTH", "PRACTICE_CODE"))
+antibiotic_practice_star_pu <- antibiotic_practice %>%
+  left_join(gp_star_pu, by = c("YEAR_MONTH", "PRACTICE_CODE"))
+
+# 12 months to April 2021, 12 months to April 2022
+antibiotic_practice_star_pu <- antibiotic_practice_star_pu %>%
+  mutate(REPORTING_PERIOD = case_when(
+    YEAR_MONTH > 202004 & YEAR_MONTH < 202105 ~ "12 months to 2021 April",
+    YEAR_MONTH > 202104 & YEAR_MONTH < 202205 ~ "12 months to 2022 April"
+  ))
+
+
+# check - for 12 months per practice - sorted
+
+
+practice_rolling_month <- antibiotic_practice_star_pu %>%
+  group_by(PRACTICE_CODE, REPORTING_PERIOD) %>%
+  summarise(
+    TOT_ITEMS = sum(TOTAL_ITEMS),
+    ITEM_BASED_STARPU = mean(GP_STAR_PU_PAT_TOTAL)
+  ) %>%
+  ungroup() %>%
+  mutate(VALUE = TOT_ITEMS / ITEM_BASED_STARPU)
+
+# Calculation for SUB_ICB
+
+gp_star_pu_sub_icb <- gp_full_months %>%
+  inner_join(
+    star_pu,
+    by = c("STAR_PU_AGE_GROUP", "SEX")
+  ) %>%
+  select(
+    PRACTICE_CODE = ORG_CODE,
+    NUMBER_OF_PATIENTS,
+    SEX,
+    YEAR_MONTH,
+    STAR_PU_AGE_GROUP,
+    STAR_PU
+  ) %>%
+  mutate(REPORTING_PERIOD = case_when(
+    YEAR_MONTH > 202004 & YEAR_MONTH < 202105 ~ "12 months to 2021 April",
+    YEAR_MONTH > 202104 & YEAR_MONTH < 202205 ~ "12 months to 2022 April"
+  ))
+
+
+# Give SUB_ICB code & practice
+# read gp sub_icb lookup first
+gp_icb_lookup <- readr::read_csv("./data-raw/gp_sub_icb_lookup.csv")
+
+
+gp_star_pu_sub_icb <- gp_star_pu_sub_icb %>%
+  left_join(
+    gp_icb_lookup,
+    by = "PRACTICE_CODE"
+  ) %>%
+  filter(GP_TYPE == 4) # only GP
+
+# Calculate STAR_PU
+gp_star_pu_sub_icb_cal <- gp_star_pu_sub_icb %>%
+  group_by(REPORTING_PERIOD, SUB_ICB, SEX, STAR_PU_AGE_GROUP, STAR_PU) %>%
+  summarise(TOTAL_SUB_ICB_PATS = sum(NUMBER_OF_PATIENTS)) %>%
+  ungroup() %>%
+  mutate(ITEM_STAR_PU = STAR_PU * TOTAL_SUB_ICB_PATS) %>%
+  group_by(REPORTING_PERIOD, SUB_ICB) %>%
+  summarise(ITEMS_STAR_PU = mean(ITEM_STAR_PU)) %>%
+  ungroup() %>%
+  rename(SUB_ICB_CODE = SUB_ICB)
+
+
+gp_star_pu_sub_icb_cal2 <- gp_star_pu_sub_icb %>%
+  # getting a average age_band, sex by practice in the time period
+  group_by(PRACTICE_CODE, REPORTING_PERIOD, SEX, STAR_PU_AGE_GROUP) %>%
+  summarise(mean_pats = mean(NUMBER_OF_PATIENTS)) %>%
+  ungroup() %>%
+  inner_join(star_pu,
+    by = c("SEX", "STAR_PU_AGE_GROUP")
+  ) %>%
+  mutate(ITEM_STAR_PU = STAR_PU * mean_pats) %>%
+  left_join(
+    gp_icb_lookup,
+    by = "PRACTICE_CODE"
+  ) %>%
+  group_by(REPORTING_PERIOD, SUB_ICB) %>%
+  summarise(ITEMS_STAR_PU = sum(ITEM_STAR_PU)) %>%
+  ungroup() %>%
+  rename(SUB_ICB_CODE = SUB_ICB)
 
 
 
-# QR - broadly ok so happy with the process
-d <- gp_star_pu_ccg_stp |>
-  filter(YEAR_MONTH >= 202104 & YEAR_MONTH < 202204) |>
-  summarise(sp = sum(GP_STAR_PU_PAT_TOTAL) / n_distinct(YEAR_MONTH))
-
-n <- antibiotic_pm |> filter(YEAR_MONTH >= 202104 & YEAR_MONTH < 202204) |> # & PCO_CODE=='07P00') |>
-  summarise(itms = sum(TOTAL_ITEMS))
 
 
-n / d
+antibiotic_sub_icb <- antibiotic_practice %>%
+  mutate(REPORTING_PERIOD = case_when(
+    YEAR_MONTH > 202004 & YEAR_MONTH < 202105 ~ "12 months to 2021 April",
+    YEAR_MONTH > 202104 & YEAR_MONTH < 202205 ~ "12 months to 2022 April"
+  )) %>%
+  group_by(REPORTING_PERIOD, SUB_ICB_CODE, SUB_ICB_NAME, DRUG_OF_INTEREST) %>%
+  summarise(TOTAL_ITEMS = sum(TOTAL_ITEMS)) %>%
+  ungroup()
 
-usethis::use_data(gp_star_pu_ccg_stp, overwrite = TRUE)
+left_join(gp_star_pu_sub_icb_cal,
+  by = c("PRACTICE_CODE", "YEAR_MONTH")
+)
+
+
+usethis::use_data(practice_rolling_month, overwrite = TRUE)

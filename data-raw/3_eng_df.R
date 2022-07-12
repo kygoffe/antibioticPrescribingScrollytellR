@@ -6,6 +6,8 @@ df_eng_pivot <- read_csv("./data-raw/epact2/Data National Initiatives - National
   janitor::clean_names() %>%
   select(
     YEAR_MONTH = month,
+    STARPU_NUM = antibacterial_items_bnf_5_1,
+    STARPU_DENOM = oral_antibacterial_item_based_star_p_us,
     STAR_PU = antibacterial_items_per_star_pu,
     ITEMS = antibacterial_items_bnf_5_1,
     COAMOX_ITEMS = co_amoxiclav_cephalosporins_quinolones_items_5,
