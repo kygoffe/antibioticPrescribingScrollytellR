@@ -32,7 +32,7 @@ mod_drug_list_ui <- function(id) {
       # Bar chart first
       highcharter::highchartOutput(
         outputId = ns("drug_chart"),
-        height = "250px"
+        height = "200px"
       ),
       br(),
       shiny::htmlOutput(outputId = ns("trend_text")),
@@ -45,7 +45,7 @@ mod_drug_list_ui <- function(id) {
       # list of practices in the selected CCG (quintile bar chart)
       highcharter::highchartOutput(
         outputId = ns("drug_trend"),
-        height = "350px"
+        height = "380px"
       ),
 
       # add dumbbell chart
@@ -193,11 +193,14 @@ mod_drug_list_server <- function(id, gp_val) {
             QUINTILE_RANK == 5 & SELECTED == "N" ~ "#003087",
             SELECTED == "Y" ~ "#ED8B00"
           )) %>%
-          dplyr::rename(GEOGRAPHY = PRACTICE_CODE) %>%
+          dplyr::rename(
+            GEOGRAPHY = PRACTICE_CODE,
+            GEOGRAPHY_NAME = PRACTICE_NAME
+          ) %>%
           # Join back pivot wider data
           dplyr::left_join(
             y = antibioticPrescribingScrollytellR::antibiotic_practice_final_pivot_wider,
-            by = c("GEOGRAPHY", "DRUG_OF_INTEREST")
+            by = c("GEOGRAPHY", "GEOGRAPHY_NAME", "DRUG_OF_INTEREST")
           ) %>%
           dplyr::arrange(STAR_PU)
       } else {
@@ -215,10 +218,13 @@ mod_drug_list_server <- function(id, gp_val) {
             QUINTILE_RANK == 5 & SELECTED == "N" ~ "#003087",
             SELECTED == "Y" ~ "#ED8B00"
           )) %>%
-          dplyr::rename(GEOGRAPHY = SUB_ICB_CODE) %>%
+          dplyr::rename(
+            GEOGRAPHY = SUB_ICB_CODE,
+            GEOGRAPHY_NAME = SUB_ICB_NAME
+          ) %>%
           dplyr::left_join(
             y = antibioticPrescribingScrollytellR::antibiotic_icb_final_pivot_wider,
-            by = c("GEOGRAPHY", "DRUG_OF_INTEREST")
+            by = c("GEOGRAPHY", "GEOGRAPHY_NAME", "DRUG_OF_INTEREST")
           ) %>%
           dplyr::arrange(STAR_PU)
       }
@@ -231,24 +237,19 @@ mod_drug_list_server <- function(id, gp_val) {
       antibioticPrescribingScrollytellR::antibiotic_practice_final %>%
         dplyr::filter(YEAR_MONTH == "Apr-22") %>%
         dplyr::filter(DRUG_OF_INTEREST == input$drugs) %>%
-        dplyr::filter(between(STAR_PU, quantile(STAR_PU, .01), quantile(STAR_PU, .99))) %>%
+        dplyr::filter(dplyr::between(STAR_PU, quantile(STAR_PU, .01), quantile(STAR_PU, .99))) %>%
         dplyr::summarise(max_val = max(STAR_PU)) %>%
         dplyr::pull()
     })
-
-
 
     max_icb_val <- reactive({
       antibioticPrescribingScrollytellR::antibiotic_icb_final %>%
         dplyr::filter(YEAR_MONTH == "Apr-22") %>%
         dplyr::filter(DRUG_OF_INTEREST == input$drugs) %>%
-        dplyr::filter(between(STAR_PU, quantile(STAR_PU, .01), quantile(STAR_PU, .99))) %>%
+        dplyr::filter(dplyr::between(STAR_PU, quantile(STAR_PU, .01), quantile(STAR_PU, .99))) %>%
         dplyr::summarise(max_val = max(STAR_PU)) %>%
         dplyr::pull()
     })
-
-
-
 
 
     # observe(print(trend_plot_df()))
@@ -276,6 +277,26 @@ mod_drug_list_server <- function(id, gp_val) {
           max = switch(input$toggle,
             "PRACTICE" = max_prac_val(),
             max_icb_val()
+          )
+        ) %>%
+        highcharter::hc_tooltip(
+          shared = FALSE,
+          formatter = htmlwidgets::JS(
+            paste0(
+              "
+            function() {
+
+                outHTML =
+                  '<b>Name: </b>' + this.point.GEOGRAPHY_NAME + '<br>' +
+                  '<b>Quintile rank: </b>' + this.point.QUINTILE_RANK + '<br>' +
+                  '<b>Compare with 12 months to April 2021: </b>' + this.point.CHANGE_DIRECTION + '<br>' +
+                  '<b>Drug: </b>' + this.point.DRUG_OF_INTEREST + '<br>' +
+                  '<b>Number of items: </b>' + Highcharts.numberFormat(this.point.TOTAL_ITEMS,0) + '<br>' +
+                  '<b>Items for STAR-PU: </b>' + Highcharts.numberFormat(this.point.STAR_PU,2)
+                return outHTML;
+            }
+            "
+            )
           )
         )
     })

@@ -272,6 +272,7 @@ antibiotic_practice_final <-
 
 
 antibiotic_practice_final_pivot_wider <- antibiotic_practice_final %>%
+  relocate(PRACTICE_NAME, .after = PRACTICE_CODE) %>%
   tidyr::pivot_wider(
     id_cols = SUB_ICB_CODE:DRUG_OF_INTEREST,
     names_from = c(YEAR_MONTH),
@@ -284,7 +285,12 @@ antibiotic_practice_final_pivot_wider <- antibiotic_practice_final_pivot_wider %
     CHANGE > 0 ~ "STAR-PU increased compared to 12 months to April 2021 value",
     CHANGE < 0 ~ "STAR-PU decreased compared to 12 months to April 2021 value"
   )) %>%
-  select(GEOGRAPHY = PRACTICE_CODE, DRUG_OF_INTEREST, CHANGE_DIRECTION)
+  select(
+    GEOGRAPHY = PRACTICE_CODE,
+    GEOGRAPHY_NAME = PRACTICE_NAME,
+    DRUG_OF_INTEREST, CHANGE_DIRECTION,
+    `Apr-21`, `Apr-22`
+  )
 
 
 
@@ -330,8 +336,11 @@ antibiotic_icb_final_pivot_wider <- antibiotic_icb_final_pivot_wider %>%
     CHANGE > 0 ~ "STAR-PU increased compared to 12 months to April 2021 value",
     CHANGE < 0 ~ "STAR-PU decreased compared to 12 months to April 2021 value"
   )) %>%
-  select(GEOGRAPHY = SUB_ICB_CODE, DRUG_OF_INTEREST, CHANGE_DIRECTION)
-
+  select(
+    GEOGRAPHY = SUB_ICB_CODE, GEOGRAPHY_NAME = SUB_ICB_NAME,
+    DRUG_OF_INTEREST, CHANGE_DIRECTION,
+    `Apr-21`, `Apr-22`
+  )
 
 
 
