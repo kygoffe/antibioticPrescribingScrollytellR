@@ -13,7 +13,7 @@ mod_intro_antibiotic_ui <- function(id) {
     h2_tabstop("Overview"),
     p(
       "System Oversight Framework (SOF) indicators to facilitate a safe reduction in overall ",
-      "antibiotic exposure by highlighting variation so ICS and CCGs can provide appropriate support ",
+      "antibiotic exposure by highlighting variation so Integrated Care Boards (ICBs) and Sub ICBs can provide appropriate support ",
       "to practices and primary care netrowks.",
       tags$ul(
         tags$li("44a Anti-microbial resistance: total prescribing of antibiotics in primary care"),
@@ -119,7 +119,7 @@ mod_intro_antibiotic_server <- function(id) {
     #   )
     #
     #   reference_value <- switch(input$england_scrolly,
-    #     "ENG_44a" = 0.87,
+    #     "ENG_44a" = 0.871,
     #     "ENG_46b" = 10
     #   )
     #

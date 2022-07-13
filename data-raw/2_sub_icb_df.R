@@ -55,6 +55,23 @@ sub_icb_df <- sub_icb_df %>%
   left_join(
     y = icb_lookup,
     by = "SUB_ICB_CODE"
+  ) %>%
+  mutate(MEET_TARGET = case_when(
+    METRIC == "STAR_PU" & VALUE <= 0.871 ~ 1,
+    METRIC == "COAMOX" & VALUE <= 10 ~ 1,
+    TRUE ~ 0 # not meet
+  )) %>%
+  mutate(
+    colour = case_when(
+      METRIC == "STAR_PU" & VALUE <= 0.87 ~ "#009639", # met target
+      METRIC == "COAMOX" & VALUE <= 10 ~ "#009639", # met target
+      TRUE ~ "#ED8B00"
+    )
+  ) %>%
+  mutate(
+    REGION = stringr::str_to_title(REGION),
+    REGION = gsub("Of", "of", REGION),
+    REGION = gsub("And", "and", REGION)
   )
 
 

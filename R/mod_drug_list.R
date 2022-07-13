@@ -49,8 +49,10 @@ mod_drug_list_ui <- function(id) {
       ),
 
       # add dumbbell chart
-
-
+      highcharter::highchartOutput(
+        outputId = ns("dumbbell_chart"),
+        height = "400px"
+      ),
       tags$text("Use Open Data Portal data ")
     )
   )
@@ -128,6 +130,8 @@ mod_drug_list_server <- function(id, gp_val) {
       )
     })
 
+    # observe(print(plot_df()))
+
     # Create first bar chart
     output$drug_chart <- highcharter::renderHighchart({
       plot_df() %>%
@@ -156,7 +160,7 @@ mod_drug_list_server <- function(id, gp_val) {
                   '<b>' + (this.point.GEOGRAPHY) + '</b> <br>' +
                   '<b>' + 'Number of items: </b>' + Highcharts.numberFormat(this.point.TOTAL_ITEMS,0) + '<br>' +
                   '<b>' + 'STAR-PUs for oral antibiotics in April 2022: </b>' + Highcharts.numberFormat(this.point.STARPU_DENOM,0) + '<br>' +
-                  '<b>' + 'Items STAR_PU: </b>' + Highcharts.numberFormat(this.point.STAR_PU,2) + '<br>'
+                  '<b>' + 'Items STAR_PU: </b>' + Highcharts.numberFormat(this.point.STAR_PU,3) + '<br>'
                 return outHTML
               }
             "
@@ -181,18 +185,8 @@ mod_drug_list_server <- function(id, gp_val) {
         antibioticPrescribingScrollytellR::antibiotic_practice_final %>%
           dplyr::filter(YEAR_MONTH == "Apr-22") %>%
           dplyr::filter(SUB_ICB_CODE == sel_sub_icb()) %>%
-          dplyr::filter(DRUG_OF_INTEREST == input$drugs) %>%
-          # Getting a quantile rank
-          dplyr::mutate(QUINTILE_RANK = dplyr::ntile(STAR_PU, 5)) %>%
           dplyr::mutate(SELECTED = ifelse(test = PRACTICE_CODE == gp_val(), "Y", "N")) %>%
-          dplyr::mutate(COLOUR = dplyr::case_when(
-            QUINTILE_RANK == 1 & SELECTED == "N" ~ "#00A9CE",
-            QUINTILE_RANK == 2 & SELECTED == "N" ~ "#41B6E6",
-            QUINTILE_RANK == 3 & SELECTED == "N" ~ "#0072CE",
-            QUINTILE_RANK == 4 & SELECTED == "N" ~ "#005EB8",
-            QUINTILE_RANK == 5 & SELECTED == "N" ~ "#003087",
-            SELECTED == "Y" ~ "#ED8B00"
-          )) %>%
+          # Getting a quantile rank
           dplyr::rename(
             GEOGRAPHY = PRACTICE_CODE,
             GEOGRAPHY_NAME = PRACTICE_NAME
@@ -201,23 +195,13 @@ mod_drug_list_server <- function(id, gp_val) {
           dplyr::left_join(
             y = antibioticPrescribingScrollytellR::antibiotic_practice_final_pivot_wider,
             by = c("GEOGRAPHY", "GEOGRAPHY_NAME", "DRUG_OF_INTEREST")
-          ) %>%
-          dplyr::arrange(STAR_PU)
+          )
       } else {
         antibioticPrescribingScrollytellR::antibiotic_icb_final %>%
           dplyr::filter(YEAR_MONTH == "Apr-22") %>%
-          dplyr::filter(DRUG_OF_INTEREST == input$drugs) %>%
           # Getting a quantile rank
           dplyr::mutate(QUINTILE_RANK = dplyr::ntile(STAR_PU, 5)) %>%
           dplyr::mutate(SELECTED = ifelse(test = SUB_ICB_CODE == sel_sub_icb(), "Y", "N")) %>%
-          dplyr::mutate(COLOUR = dplyr::case_when(
-            QUINTILE_RANK == 1 & SELECTED == "N" ~ "#00A9CE",
-            QUINTILE_RANK == 2 & SELECTED == "N" ~ "#41B6E6",
-            QUINTILE_RANK == 3 & SELECTED == "N" ~ "#0072CE",
-            QUINTILE_RANK == 4 & SELECTED == "N" ~ "#005EB8",
-            QUINTILE_RANK == 5 & SELECTED == "N" ~ "#003087",
-            SELECTED == "Y" ~ "#ED8B00"
-          )) %>%
           dplyr::rename(
             GEOGRAPHY = SUB_ICB_CODE,
             GEOGRAPHY_NAME = SUB_ICB_NAME
@@ -225,12 +209,11 @@ mod_drug_list_server <- function(id, gp_val) {
           dplyr::left_join(
             y = antibioticPrescribingScrollytellR::antibiotic_icb_final_pivot_wider,
             by = c("GEOGRAPHY", "GEOGRAPHY_NAME", "DRUG_OF_INTEREST")
-          ) %>%
-          dplyr::arrange(STAR_PU)
+          )
       }
     })
 
-
+    # observe(print(trend_plot_df()))
     # Maximum STAR-PU value for all the practices and CCG but exclude top and bottom 1%
 
     max_prac_val <- reactive({
@@ -254,11 +237,28 @@ mod_drug_list_server <- function(id, gp_val) {
 
     # observe(print(trend_plot_df()))
 
-    output$drug_trend <- highcharter::renderHighchart({
+    trend_bar_df <- reactive({
       req(input$drugs)
-      req(gp_val())
-
       trend_plot_df() %>%
+        dplyr::filter(DRUG_OF_INTEREST == input$drugs) %>%
+        dplyr::mutate(QUINTILE_RANK = dplyr::ntile(STAR_PU, 5)) %>%
+        dplyr::mutate(COLOUR = dplyr::case_when(
+          QUINTILE_RANK == 1 & SELECTED == "N" ~ "#00A9CE",
+          QUINTILE_RANK == 2 & SELECTED == "N" ~ "#41B6E6",
+          QUINTILE_RANK == 3 & SELECTED == "N" ~ "#0072CE",
+          QUINTILE_RANK == 4 & SELECTED == "N" ~ "#005EB8",
+          QUINTILE_RANK == 5 & SELECTED == "N" ~ "#003087",
+          SELECTED == "Y" ~ "#ED8B00"
+        )) %>%
+        dplyr::arrange(STAR_PU)
+    })
+
+
+    output$drug_trend <- highcharter::renderHighchart({
+      # req(input$drugs)
+      # req(gp_val())
+
+      trend_bar_df() %>%
         highcharter::hchart(
           type = "column",
           highcharter::hcaes(
@@ -269,7 +269,7 @@ mod_drug_list_server <- function(id, gp_val) {
         ) %>%
         theme_nhsbsa(stack = NA) %>%
         highcharter::hc_xAxis(
-          categories = trend_plot_df()$GEOGRAPHY,
+          # categories = trend_plot_df()$GEOGRAPHY,
           title = list(text = "")
         ) %>%
         highcharter::hc_yAxis(
@@ -292,11 +292,94 @@ mod_drug_list_server <- function(id, gp_val) {
                   '<b>Compare with 12 months to April 2021: </b>' + this.point.CHANGE_DIRECTION + '<br>' +
                   '<b>Drug: </b>' + this.point.DRUG_OF_INTEREST + '<br>' +
                   '<b>Number of items: </b>' + Highcharts.numberFormat(this.point.TOTAL_ITEMS,0) + '<br>' +
-                  '<b>Items for STAR-PU: </b>' + Highcharts.numberFormat(this.point.STAR_PU,2)
+                  '<b>Items for STAR-PU: </b>' + Highcharts.numberFormat(this.point.STAR_PU,3)
                 return outHTML;
             }
             "
             )
+          )
+        )
+    })
+
+
+    # Pull which practice &
+
+    # plot data
+    dumbbell_df <- reactive({
+      req(gp_val())
+      req(input$drugs)
+      req(input$toggle)
+
+      if (input$toggle == "PRACTICE") {
+        trend_plot_df() %>%
+          dplyr::filter(GEOGRAPHY == gp_val())
+      } else {
+        trend_plot_df() %>%
+          dplyr::filter(GEOGRAPHY == sel_sub_icb())
+      }
+    })
+
+
+    output$dumbbell_chart <- highcharter::renderHighchart({
+      req(gp_val())
+      req(input$toggle)
+
+      highcharter::highchart() %>%
+        highcharter::hc_add_series(
+          data = dumbbell_df(),
+          type = "dumbbell",
+          highcharter::hcaes(
+            low = `Apr-21`,
+            high = `Apr-22`
+          ),
+          lowColor = "#425563",
+          color = "#425563",
+          marker = list(fillColor = "#005EB8")
+        ) %>%
+        highcharter::hc_subtitle(
+          useHTML = TRUE,
+          text =
+            "
+            <span style = 'color:#005EB8; font-size: 20px'> &bull; </span> <b> <span style = font-size: 35px'> Items STAR-PU 12 months to April 2022 </span> </b>
+            <span style = 'color:#425563; font-size: 20px'> &bull; </span> <b> <span style = font-size: 35px'> Items STAR-PU 12 months to April 2021 </span>
+            ",
+          align = "center"
+        ) %>%
+        highcharter::hc_chart(
+          inverted = TRUE,
+          marginLeft = 200
+        ) %>%
+        highcharter::hc_scrollbar(enabled = FALSE) %>%
+        theme_nhsbsa() %>%
+        highcharter::hc_xAxis(
+          categories = unique(dumbbell_df()$DRUG_OF_INTEREST),
+          max = 5 # it shows n + 1 = 15
+        ) %>%
+        highcharter::hc_yAxis(
+          min = 0,
+          max = max(
+            max(dumbbell_df()$`Apr-21`, na.rm = TRUE),
+            max(dumbbell_df()$`Apr-22`, na.rm = TRUE)
+          ),
+          title = list(
+            text = (unique(dumbbell_df()$GEOGRAPHY_NAME)
+            )
+          )
+        ) %>%
+        highcharter::hc_legend(enabled = FALSE) %>%
+        highcharter::hc_tooltip(
+          useHTML = TRUE,
+          formatter = htmlwidgets::JS(
+            "
+            function() {
+                outHTML =
+                  '<b>' + this.point.GEOGRAPHY_NAME + '</b> <br>' +
+                  'Items STAR-PU 12 months to April 2022: ' + '<b>' + Highcharts.numberFormat(this.point.high,3) +  '</b> <br>' +
+                  'Items STAR-PU 12 months to April 2021: ' + '<b>' + Highcharts.numberFormat(this.point.low,3) + ' </b>'
+
+                return(outHTML)
+            }
+            "
           )
         )
     })
