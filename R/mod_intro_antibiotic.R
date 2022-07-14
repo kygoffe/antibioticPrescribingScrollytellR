@@ -12,14 +12,26 @@ mod_intro_antibiotic_ui <- function(id) {
   tagList(
     h2_tabstop("Overview"),
     p(
-      "System Oversight Framework (SOF) indicators to facilitate a safe reduction in overall ",
-      "antibiotic exposure by highlighting variation so Integrated Care Boards (ICBs) and Sub ICBs can provide appropriate support ",
-      "to practices and primary care netrowks.",
+      "Antimicrobial resistance (AMR) is a global health and development threat.",
+      "WHO has declared that AMR is one of the top ten goloval public threats facing humanity.",
+      "To respond to this urgency, Department of Health and Social Care published the the UK ‘s 20-year ",
+      "vision for antimicrobial resistance. It sets how the UK will contribute to containing and controlling AMR by 2040. ",
+      "Primary care is responsible for around 80% of all antibiotic prescribing in the NHS.",
+      "The System Oversight Framework (SOF) set two metrics to achieve the UK AMR national ",
+      "action plan ambition to reduce community antibiotic prescribing by 25% by 2024.",
+      br(),
+      "Two SOF indicators are as following:",
       tags$ul(
-        tags$li("44a Anti-microbial resistance: total prescribing of antibiotics in primary care"),
-        tags$li("46b Anti-microbial resistance: proportion of broad-spectrum antibiotic prescribing in primary care"),
+        tags$li(
+          "The number of antibiotic items prescribed in primary care, divided by the item-based Specific Therapeutic group Age-Sex ",
+          "related Prescribnig Unit (STAR-PU) per annum to be", tags$b("at or less than 0.871.")
+        ),
+        tags$li(
+          "The number of broad-spectrum antibiotic items from co-amoxiclav, cephalosporin class and fluoroquinolone class drugs as a ",
+          "percentage of the total number of antibacterial items prescribed in primary care ",
+          tags$b("at or less than 10%.")
+        ),
       ),
-      tags$text("[TEXT WILL BE ADDED]"),
       tags$div(
         style = "margin-top: 10vh" # add some buffer space after the chart
       ),

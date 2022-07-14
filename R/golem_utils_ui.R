@@ -419,3 +419,48 @@ make_action_button <- function(tag, inputId = NULL) {
 #'
 #'   return(HTML(html))
 #' }
+
+#' Define tooltip text
+#'
+#' @noRd
+tooltip_text <- list(
+  Amoxicillin = tags$div(
+    class = "nhsuk-u-font-size-14",
+    "BNF code : Amoxicillin (0501013B0)"
+  ),
+  UTIs = tags$div(
+    class = "nhsuk-u-font-size-14",
+    "BNF code: ", br(),
+    "Pivmecillinam hydrochloride (0501015P0)", br(),
+    "Nitrofurantoin (0501130R0)", br(), "Trimethoprim (0501080W0)",
+    br(), "Fosfomycin trometamol (0501070AE)", br(), "Fosfomycin calcium (0501130S0)"
+  ),
+  coamoxiclav = tags$div(
+    class = "nhsuk-u-font-size-14",
+    "BNF code: ", br(),
+    "Amoxicillin/clavulanic acid) (0501013K0)"
+  ),
+  cephalosporins = tags$div(
+    class = "nhsuk-u-font-size-14",
+    "BNF code: ", br(),
+    "Cefaclor (0501021A0)", br(),
+    "Cefadroxil (0501021B0)", br(),
+    "Cefixime (0501021C0)", br(),
+    "Cefotaxime sodium (0501021D0)", br(),
+    "Ceftriaxone sodium (0501021G0)", br(),
+    "Ceftazidime pentahydrate (0501021H0)", br(),
+    "Cefuroxime sodium (0501021J0)", br(),
+    "Cefuroxime axetil (0501021K0)", br(),
+    "Cefalexin (0501021L0)", br(),
+    "Cefradine (0501021M0)", br()
+  ),
+  quinolones = tags$div(
+    class = "nhsuk-u-font-size-14",
+    "BNF code: ", br(),
+    "Ciprofloxacin (0501120L0)", br(),
+    "Ofloxacin (0501120P0)", br(),
+    "Norfloxacin (0501120Q0)", br(),
+    "Levofloxacin (0501120X0)", br(),
+    "Moxifloxacin (0501120Y0)"
+  )
+)

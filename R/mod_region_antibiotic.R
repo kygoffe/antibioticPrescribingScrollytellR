@@ -10,14 +10,16 @@
 mod_region_antibiotic_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2_tabstop("Breakdown by geography"),
-    p("The map and chart show antibiotic prescribing SOF metrics by selected region and drill down to CCG level."),
-    p("TEXT WILL BE ADDED"),
-    # Chart: Select by Region as there are too many CCGs, click the CCG map
-    # Show two charts; England, STP as reference line
-
+    h2_tabstop("Geographical variation of prescribing of antibiotics"),
+    p("The map and chart show antibiotic prescribing metrics by selected region and sub ICB locations."),
+    p(
+      "Most Sub ICB locations in East of England, North East and Yorshire and North West region did not ",
+      " meet the SOF target value of 0.871 for the Antibacterial items STAR-PU 12 months to April 2022.",
+      br(), "However, most Sub ICB locations met the target of lower than 10% of the co-amoxiclav, cephalosporin class and quinolone as a percantage of the total ",
+      "number of antibacterial items prescribed in primary care."
+    ),
     nhs_card(
-      heading = "Geographical variation in AMR metrics",
+      heading = "Geographical variation",
       # two drop down menu
       nhs_grid_2_col(
         nhs_selectInput(
@@ -72,6 +74,14 @@ mod_region_antibiotic_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    # add title
+    output$region_text <- renderUI({
+      switch(input$metric,
+        "STAR_PU" = "Antibacterial items/STAR-PU",
+        "COAMOX" = "Co-amoxiclav, Cephalosporins & Quinolones"
+      )
+    })
+
     geography_df <- reactive({
       req(input$region)
       req(input$metric)
@@ -89,7 +99,7 @@ mod_region_antibiotic_server <- function(id) {
       }
     })
 
-
+    # observe(print(geography_df()))
 
 
     map_list <- reactive({
@@ -128,8 +138,8 @@ mod_region_antibiotic_server <- function(id) {
             pointFormat = paste0(
               "<b> Sub ICB location: </b> {point.SUB_ICB_NAME}<br> <b>",
               switch(input$metric,
-                "STAR_PU" = "Antibacterial items/STAR PU (April 2022):</b> {point.VALUE:.2f}",
-                "COAMOX" = "Co-amoxiclav, Cephalosporins & Quinolones (April 2022): </b> {point.VALUE:.2f}%"
+                "STAR_PU" = "Antibacterial items/STAR-PU (12 months to April 2022):</b> {point.VALUE:.2f}",
+                "COAMOX" = "Co-amoxiclav, Cephalosporins & Quinolones (12 months to April 2022): </b> {point.VALUE:.2f}%"
               )
             )
           )
@@ -191,7 +201,10 @@ mod_region_antibiotic_server <- function(id) {
           dplyr::filter(SUB_ICB_NAME == input$mapclick_sof &
             METRIC == input$metric) %>%
           dplyr::mutate(
-            MEET = ifelse(test = VALUE < reference_value, "Met the target", "Not met the target")
+            MEET = ifelse(test = VALUE < reference_value, "Met the target", "Not met the target"),
+            METRIC_TOOLTIP = ifelse(METRIC == "STAR_PU", "Antibacterial items/STAR-PU",
+              "Proportion of co-amoxiclav, cephalosporin & quinolon items"
+            )
           ) %>%
           highcharter::hchart(
             type = "column",
@@ -209,7 +222,7 @@ mod_region_antibiotic_server <- function(id) {
           ) %>%
           highcharter::hc_yAxis(
             min = 0,
-            max = 1.5,
+            max = max_val(),
             title = list(
               text = "12 rolling month trend",
               align = "middle"
@@ -245,13 +258,13 @@ mod_region_antibiotic_server <- function(id) {
                 if(this.point.METRIC == 'STAR_PU'){
                   outHTML =
                     '<b>12 months to: </b>' + this.point.YEAR_MONTH + '<br>' +
-                    '<b>Metric: </b>' + this.point.METRIC + '<br>' +
+                    '<b>Metric: </b>' + this.point.METRIC_TOOLTIP + '<br>' +
                     '<b>Item STAR-PU: </b>' + Highcharts.numberFormat(this.point.y, 2)
 
                 }else{
                 outHTML =
                     '<b>12 months to: </b>' + this.point.YEAR_MONTH + '<br>' +
-                    '<b>Metric: </b>' + this.point.METRIC + '<br>' +
+                    '<b>Metric: </b>' + this.point.METRIC_TOOLTIP + '<br>' +
                     '<b>% of Co-amoxiclav, Cephalosporins & Quinolones: </b>' + Highcharts.numberFormat(this.point.y, 1) + '%'
                 }
 

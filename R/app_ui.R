@@ -35,7 +35,7 @@ app_ui <- function(request) {
         class = "nhsuk-main-wrapper",
         id = "maincontent",
         role = "main",
-        h1("Antibiotic prescribing in England primary care"),
+        h1("Antibiotic prescribing in primary care in England"),
         hr(),
         nhs_navlistPanel(
           well = TRUE,
@@ -51,6 +51,10 @@ app_ui <- function(request) {
 
             # mod_nhs_region_trend_ui("nhs_region_trend_1"),
             # New try
+          ),
+          tabPanel(
+            title = "Definitions",
+            mod_definitions_ui("definitions_ui_1")
           )
         ),
         # reset vertical scroll bar when clicking tabpanel link
@@ -83,7 +87,7 @@ golem_add_external_resources <- function() {
     favicon(),
     bundle_resources(
       path = app_sys("app/www"),
-      app_title = "antibioticPrescribingScrollytellR"
+      app_title = "Antibiotic prescribing in primary care in England"
     )
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()

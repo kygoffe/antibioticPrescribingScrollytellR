@@ -12,8 +12,30 @@ mod_drug_list_ui <- function(id) {
   tagList(
     h2_tabstop("Presentations contributing to variation"),
     p(
-      "Further analysis by Amoxicillin, UTIs, Co-amoxiclav, Cephalosporins and Quinolones for the selected practice: ", # Need to create tippy to show the list of drugs that have been included.
-      tags$b(textOutput(outputId = ns("selected_gp"), inline = TRUE))
+      "Selected practice: ", tags$b(textOutput(outputId = ns("selected_gp"), inline = TRUE)),
+      "Further analysis by",
+      tippy(
+        text = "Amoxicillin,",
+        tooltip = tooltip_text$Amoxicillin
+      ),
+      tippy(
+        text = "UTIs,",
+        tooltip = tooltip_text$UTIs
+      ),
+      tippy(
+        text = "Co-amoxiclav,",
+        tooltip = tooltip_text$coamoxiclav
+      ),
+      tippy(
+        text = "Cephalosporins",
+        tooltip = tooltip_text$cephalosporins
+      ),
+      "and ",
+      tippy(
+        text = "Quinolones",
+        tooltip = tooltip_text$quinolones
+      ),
+      "for the selected practice: ", # Need to create tippy to show the list of drugs that have been included.
     ),
     nhs_card(
       heading = p(textOutput(outputId = ns("selected_gp_text"), inline = TRUE), "(12 months to April 2022)"),
@@ -38,7 +60,7 @@ mod_drug_list_ui <- function(id) {
       shiny::htmlOutput(outputId = ns("trend_text")),
       radioButtons(
         inputId = ns("toggle"),
-        choices = c("Practices" = "PRACTICE", "Sub ICBs" = "SUB_ICB"),
+        choices = c("Practices" = "PRACTICE", "Sub ICB location" = "SUB_ICB"),
         label = "Compare all practices from the selected sub ICB/ All sub ICBs ",
         inline = TRUE
       ),
@@ -269,8 +291,11 @@ mod_drug_list_server <- function(id, gp_val) {
         ) %>%
         theme_nhsbsa(stack = NA) %>%
         highcharter::hc_xAxis(
-          # categories = trend_plot_df()$GEOGRAPHY,
-          title = list(text = "")
+          title = list(text = switch(input$toggle,
+            "PRACTICE" = "GP practices",
+            "Sub ICB locations"
+          )),
+          labels = list(enabled = FALSE)
         ) %>%
         highcharter::hc_yAxis(
           title = list(text = paste(input$drugs, "STAR-PU (12 months to April 2022)")),
@@ -287,10 +312,10 @@ mod_drug_list_server <- function(id, gp_val) {
             function() {
 
                 outHTML =
+                  '<b>' + this.point.DRUG_OF_INTEREST + '</b> <br>' +
                   '<b>Name: </b>' + this.point.GEOGRAPHY_NAME + '<br>' +
                   '<b>Quintile rank: </b>' + this.point.QUINTILE_RANK + '<br>' +
                   '<b>Compare with 12 months to April 2021: </b>' + this.point.CHANGE_DIRECTION + '<br>' +
-                  '<b>Drug: </b>' + this.point.DRUG_OF_INTEREST + '<br>' +
                   '<b>Number of items: </b>' + Highcharts.numberFormat(this.point.TOTAL_ITEMS,0) + '<br>' +
                   '<b>Items for STAR-PU: </b>' + Highcharts.numberFormat(this.point.STAR_PU,3)
                 return outHTML;
@@ -326,7 +351,8 @@ mod_drug_list_server <- function(id, gp_val) {
 
       highcharter::highchart() %>%
         highcharter::hc_add_series(
-          data = dumbbell_df(),
+          data = dumbbell_df() %>%
+            dplyr::filter(DRUG_OF_INTEREST != "Other drugs"),
           type = "dumbbell",
           highcharter::hcaes(
             low = `Apr-21`,
@@ -352,8 +378,14 @@ mod_drug_list_server <- function(id, gp_val) {
         highcharter::hc_scrollbar(enabled = FALSE) %>%
         theme_nhsbsa() %>%
         highcharter::hc_xAxis(
-          categories = unique(dumbbell_df()$DRUG_OF_INTEREST),
-          max = 5 # it shows n + 1 = 15
+          categories = unique(dumbbell_df()$DRUG_OF_INTEREST %>%
+            purrr::discard(
+              .p = stringr::str_detect(
+                string = .,
+                pattern = "Other drugs"
+              )
+            )),
+          max = 4 # it shows n + 1 = 15
         ) %>%
         highcharter::hc_yAxis(
           min = 0,

@@ -12,5 +12,5 @@ app_server <- function(input, output, session) {
   mod_drug_list_server("drug_list_1", gp_val)
   mod_region_antibiotic_server("region_antibiotic_1")
   # mod_nhs_region_trend_server("nhs_region_trend_1")
-  # mod_definitions_server("definitions_1")
+  mod_definitions_server("definitions_1")
 }

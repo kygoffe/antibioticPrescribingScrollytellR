@@ -10,12 +10,9 @@
 mod_gp_overall_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2_tabstop("How has antibiotic prescribing changed in your GP practice?"),
+    h2_tabstop("Antibiotic prescribing by general practices"),
     p(
-      "In this section, user can select their GP practice and compare with sub ICB and England.",
-      "Comment on their performance (lower than sub ICB/ England)",
-      " Top 20% bottom 20% etc (split GP practice in quintiles?)",
-      "using bold, colour to highlight the key message in the paragraph"
+      textOutput(outputId = ns("selected_gp"), inline = TRUE)
     ),
     nhs_card(
       heading = "Antimicrobial Stewardship data reporting against NHS AMR metrics",
@@ -33,7 +30,7 @@ mod_gp_overall_ui <- function(id) {
         ),
         nhs_selectInput(
           inputId = ns("ccg"),
-          label = "Sub ICB/CCG",
+          label = "Sub ICB locations",
           choices = c(sort(unique(antibioticPrescribingScrollytellR::gp_merge_df$SUB_ICB_NAME))),
           full_width = TRUE
         ),
@@ -50,10 +47,10 @@ mod_gp_overall_ui <- function(id) {
         outputId = ns("bar_chart"),
         height = "250px"
       ),
-      shiny::htmlOutput(ns("scatter_chart_text")),
+      shiny::htmlOutput(ns("metric_qunitile_chart_text")),
       # scatterplot - practice starpu vs imd rank
       highcharter::highchartOutput(
-        outputId = ns("scatter_chart"),
+        outputId = ns("metric_quintile_chart"),
         height = "250px"
       ),
       shiny::htmlOutput(ns("trend_chart_text")),
@@ -65,7 +62,7 @@ mod_gp_overall_ui <- function(id) {
       tags$text(
         class = "highcharts-caption",
         style = "font-size: 9pt;",
-        "Walk-in centres are excluded from the charts."
+        ""
       )
     )
   )
@@ -77,6 +74,16 @@ mod_gp_overall_ui <- function(id) {
 mod_gp_overall_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+
+    output$selected_gp <- renderText({
+      req(input$gp)
+
+      t <- paste(input$gp)
+      return(t)
+    })
+
+
 
     # generate column chart data frame
     gp_sel <- reactive({
@@ -159,7 +166,7 @@ mod_gp_overall_server <- function(id) {
 
     reference_value <- reactive({
       switch(input$metric,
-        "STAR_PU" = 0.87,
+        "STAR_PU" = 0.871,
         "COAMOX" = 10
       )
     })
@@ -199,7 +206,7 @@ mod_gp_overall_server <- function(id) {
           min = 0,
           max = max_val(),
           title = list(text = switch(input$metric,
-            "STAR_PU" = "Items/STAR PU",
+            "STAR_PU" = "Items/STAR-PU",
             "COAMOX" = "% of items"
           )),
           plotLines = list(list(
@@ -210,7 +217,7 @@ mod_gp_overall_server <- function(id) {
         highcharter::hc_tooltip(
           shared = TRUE,
           pointFormat = switch(input$metric,
-            "STAR_PU" = "<b>STAR_PU: {point.y:.2f}</b>",
+            "STAR-PU" = "<b>STAR_PU: {point.y:.2f}</b>",
             "COAMOX" = "<b>{point.y:.1f}%</b>"
           )
         )
@@ -222,7 +229,7 @@ mod_gp_overall_server <- function(id) {
       tags$text(
         class = "highcharts-caption",
         switch(input$metric,
-          "STAR_PU" = "12 months to April 2022, add text for the bar chart",
+          "STAR-PU" = "12 months to April 2022, add text for the bar chart",
           "COAMOX" = "12 months to April 2022, add text for the bar chart"
         )
       )
@@ -238,7 +245,7 @@ mod_gp_overall_server <- function(id) {
     lsoa_metric_text <- reactive({
       if (input$metric == "STAR_PU") {
         paste0(
-          "<b>Item STAR_PU:</b> {point.VALUE:,.2f}"
+          "<b>Item STAR-PU:</b> {point.VALUE:,.2f}"
         )
       } else {
         paste0(
@@ -252,7 +259,7 @@ mod_gp_overall_server <- function(id) {
     gp_tooltip_text <- reactive({
       paste0(
         "<b>{point.PRACTICE_NAME}</b> <br>",
-        "<b>SUB ICB/CCG:</b> {point.SUB_ICB_NAME} <br>",
+        "<b>SUB ICB location:</b> {point.SUB_ICB_NAME} <br>",
         "<b>IMD Decile:</b> {point.IMD_DECILE} <br>",
         "<b>2019 IMD rank (out of 32,844):</b> {point.IMD_RANK:,.0f} <br>",
         lsoa_metric_text()
@@ -294,7 +301,10 @@ mod_gp_overall_server <- function(id) {
           ),
           name = "Other practices",
           showInLegend = TRUE,
-          marker = list(symbol = "circle", fillColor = "#ED8B00")
+          marker = list(
+            symbol = "circle", fillColor = "#768692",
+            width = 9
+          )
         ) %>%
         highcharter::hc_xAxis(
           min = 0,
@@ -308,7 +318,7 @@ mod_gp_overall_server <- function(id) {
           min = 0,
           max = max_val(),
           title = list(text = switch(input$metric,
-            "STAR_PU" = "Items/STAR PU",
+            "STAR_PU" = "Items/STAR-PU",
             "COAMOX" = "% of items"
           )),
           plotLines = list(list(
@@ -316,10 +326,23 @@ mod_gp_overall_server <- function(id) {
             dashStyle = "shortdash"
           ))
         ) %>%
-        theme_nhsbsa(stack = NA) %>%
+        theme_nhsbsa(stack = NA) |>
         highcharter::hc_tooltip(
           headerFormat = "",
           pointFormat = gp_tooltip_text()
+        ) %>%
+        highcharter::hc_plotOptions(
+          series = list(
+            states = list(
+              inactive = list(opacity = 1)
+            )
+          ),
+          line = list(
+            states = list(
+              hover = list(enabled = F)
+            ),
+            enableMouseTracking = F
+          )
         )
     })
 
@@ -343,7 +366,7 @@ mod_gp_overall_server <- function(id) {
           VALUE
         ) %>%
         dplyr::mutate(
-          GEOGRAPHY_TYPE = "GP"
+          GEOGRAPHY_TYPE = "Selected GP"
         )
     })
 
@@ -360,7 +383,9 @@ mod_gp_overall_server <- function(id) {
           GEOGRAPHY = SUB_ICB_NAME,
           VALUE
         ) %>%
-        dplyr::mutate(GEOGRAPHY_TYPE = "Sub ICB/CCG")
+        dplyr::mutate(
+          GEOGRAPHY_TYPE = "Selected Sub ICB location"
+        )
     })
 
     # observe(print(ccg_trend()))
@@ -409,7 +434,7 @@ mod_gp_overall_server <- function(id) {
           min = 0,
           max = max_val(),
           title = list(text = switch(input$metric,
-            "STAR_PU" = "Items/STAR PU",
+            "STAR_PU" = "Items/STAR-PU",
             "COAMOX" = "% of items"
           )),
           plotLines = list(list(
@@ -442,6 +467,87 @@ mod_gp_overall_server <- function(id) {
         dplyr::distinct(PRACTICE_CODE) %>%
         dplyr::pull()
     })
+
+
+    # Quintile chart (GP practices quintile by metrics)
+    metric_quintile_df <- reactive({
+      req(input$gp)
+
+      gp_sel() %>%
+        dplyr::mutate(
+          SELECTED = ifelse(test = PRACTICE_NAME == input$gp, "Y", "N"),
+          QUINTILE_RANK = dplyr::ntile(VALUE, 5),
+          COLOUR = dplyr::case_when(
+            QUINTILE_RANK == 1 & SELECTED == "N" ~ "#00A9CE",
+            QUINTILE_RANK == 2 & SELECTED == "N" ~ "#41B6E6",
+            QUINTILE_RANK == 3 & SELECTED == "N" ~ "#0072CE",
+            QUINTILE_RANK == 4 & SELECTED == "N" ~ "#005EB8",
+            QUINTILE_RANK == 5 & SELECTED == "N" ~ "#003087",
+            SELECTED == "Y" ~ "#ED8B00"
+          ),
+          METRIC_TOOLTIP = ifelse(METRIC == "STAR_PU", "Antibacterial items/STAR-PU",
+            "Proportion of co-amoxiclav, cephalosporin & quinolon items"
+          )
+        ) %>%
+        dplyr::arrange(VALUE)
+    })
+
+    output$metric_quintile_chart <- highcharter::renderHighchart({
+      metric_quintile_df() %>%
+        highcharter::hchart(
+          type = "column",
+          highcharter::hcaes(
+            x = PRACTICE_NAME,
+            y = VALUE,
+            color = COLOUR
+          )
+        ) %>%
+        theme_nhsbsa(stack = NA) %>%
+        highcharter::hc_xAxis(
+          title = list(text = "GP practices"),
+          labels = list(enabled = FALSE)
+        ) %>%
+        highcharter::hc_yAxis(
+          min = 0,
+          max = max_val(),
+          title = list(text = switch(input$metric,
+            "STAR_PU" = "Items/STAR-PU",
+            "COAMOX" = "% of items"
+          )),
+          plotLines = list(list(
+            value = reference_value(), color = "#8A1538", width = 1,
+            dashStyle = "shortdash"
+          ))
+        ) %>%
+        highcharter::hc_tooltip(
+          shared = FALSE,
+          formatter = highcharter::JS(
+            "
+              function () {
+                if(this.point.METRIC == 'STAR_PU'){
+                  outHTML =
+                    '<b>Name: </b>' + this.point.PRACTICE_NAME + '<br>' +
+                    '<b>Quintile rank: </b>' + this.point.QUINTILE_RANK + '<br>' +
+                    '<b>Metric: </b>' + this.point.METRIC_TOOLTIP + '<br>' +
+                    '<b>Item STAR-PU: </b>' + Highcharts.numberFormat(this.point.y, 2)
+
+                }else{
+                outHTML =
+                    '<b>Name: </b>' + this.point.PRACTICE_NAME + '<br>' +
+                    '<b>Quintile rank: </b>' + this.point.QUINTILE_RANK + '<br>' +
+                    '<b>Metric: </b>' + this.point.METRIC_TOOLTIP + '<br>' +
+                    '<b>% of Co-amoxiclav, Cephalosporins & Quinolones: </b>' + Highcharts.numberFormat(this.point.y, 1) + '%'
+                }
+
+                return outHTML
+              }
+              "
+          )
+        )
+    })
+
+
+
 
     return(gp_val) # return the selected gp.......
   })
