@@ -59,6 +59,7 @@ mod_gp_overall_ui <- function(id) {
         outputId = ns("trend_chart"),
         height = "250px"
       ),
+      mod_nhs_download_ui(id = ns("gp_overall_download")),
       tags$text(
         class = "highcharts-caption",
         style = "font-size: 9pt;",

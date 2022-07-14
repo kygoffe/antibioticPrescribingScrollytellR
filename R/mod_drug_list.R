@@ -75,6 +75,7 @@ mod_drug_list_ui <- function(id) {
         outputId = ns("dumbbell_chart"),
         height = "400px"
       ),
+      mod_nhs_download_ui(id = ns("gp_drug_download")),
       tags$text("Use Open Data Portal data ")
     )
   )
