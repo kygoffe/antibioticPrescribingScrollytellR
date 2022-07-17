@@ -19,8 +19,15 @@ mod_definitions_ui <- function(id) {
       )
     ),
     p(
-      "UTI",
+      "Lower UTI",
+      
       tags$li("Pivmecillinam hydrochloride (0501015P0)"),
+      tags$li("Cefaclor (0501021A0)"),
+      tags$li("Cefadroxil	(0501021B0)"),
+      tags$li("Cefixime	(0501021C0)"),
+      tags$li("Cefuroxime Axetil (0501021K0)"),
+      tags$li("Cefalexin (0501021L0)"),
+      tags$li("Cefradine (0501021M0)"),
       tags$li("Nitrofurantoin (0501130R0)"),
       tags$li("Trimethoprim (0501080W0)"),
       tags$li("Fosfomycin trometamol (0501070AE)"),

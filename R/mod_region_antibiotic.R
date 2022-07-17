@@ -122,57 +122,113 @@ mod_region_antibiotic_server <- function(id) {
 
     output$map_chart <- highcharter::renderHighchart({
       req(input$metric)
-
-      highcharter::highchart() %>%
-        highcharter::hc_add_series_map(
-          df = geography_df(),
-          map = map_list(),
-          joinBy = "SUB_ICB_NAME",
-          value = "MEET_TARGET",
-          allowPointSelect = TRUE,
-          cursur = "pointer",
-          borderColor = "black",
-          borderWidth = 0.2,
-          tooltip = list(
-            headerFormat = "",
-            pointFormat = paste0(
-              "<b> Sub ICB location: </b> {point.SUB_ICB_NAME}<br> <b>",
-              switch(input$metric,
-                "STAR_PU" = "Antibacterial items/STAR-PU (12 months to April 2022):</b> {point.VALUE:.2f}",
-                "COAMOX" = "Co-amoxiclav, Cephalosporins & Quinolones (12 months to April 2022): </b> {point.VALUE:.2f}%"
+      
+      if(input$metric == "STAR_PU"){
+        highcharter::highchart() %>%
+          highcharter::hc_add_series_map(
+            df = geography_df(),
+            map = map_list(),
+            joinBy = "SUB_ICB_NAME",
+            value = "MEET_TARGET",
+            allowPointSelect = TRUE,
+            cursur = "pointer",
+            borderColor = "black",
+            borderWidth = 0.2,
+            tooltip = list(
+              headerFormat = "",
+              pointFormat = paste0(
+                "<b> Sub ICB location: </b> {point.SUB_ICB_NAME}<br> <b>",
+                switch(input$metric,
+                       "STAR_PU" = "Antibacterial items/STAR-PU (12 months to April 2022):</b> {point.VALUE:.2f}",
+                       "COAMOX" = "Co-amoxiclav, Cephalosporins & Quinolones (12 months to April 2022): </b> {point.VALUE:.2f}%"
+                )
               )
             )
-          )
-        ) %>%
-        theme_nhsbsa(palette = "gender") %>%
-        highcharter::hc_colorAxis(
-          dataClassColor = "category",
-          dataClasses = list(
-            list(from = 0, to = 0, color = "#ED8B00", name = "Not met the target"), # didn't meet the target (orange)
-            list(from = 1, to = 1, color = "#009639", name = "Met the target") # meet the target (blue)
-          )
-        ) %>%
-        # highcharter::hc_legend(enabled = FALSE) %>%
-        highcharter::hc_legend(
-          enabled = TRUE,
-          verticalAlign = "bottom",
-          title = list(text = "12 months to April 2022")
-        ) %>%
-        highcharter::hc_plotOptions(
-          map = list(
-            events = list(
-              click = htmlwidgets::JS(
-                paste0(
-                  "
+          ) %>%
+          theme_nhsbsa(palette = "gender") %>%
+          highcharter::hc_colorAxis(
+            dataClassColor = "category",
+            dataClasses = list(
+              list(from = 0, to = 0, color = "#41B6E6", name = "Not met the target"), # didn't meet the target (orange)
+              list(from = 1, to = 1, color = "#330072", name = "Met the target") # meet the target (blue)
+            )
+          ) %>%
+          # highcharter::hc_legend(enabled = FALSE) %>%
+          highcharter::hc_legend(
+            enabled = TRUE,
+            verticalAlign = "bottom",
+            title = list(text = "12 months to April 2022")
+          ) %>%
+          highcharter::hc_plotOptions(
+            map = list(
+              events = list(
+                click = htmlwidgets::JS(
+                  paste0(
+                    "
                 function(event) {
                   Shiny.setInputValue('", id, "-mapclick_sof', event.point.SUB_ICB_NAME);
                 }
                 "
+                  )
                 )
               )
             )
           )
-        )
+      }else{
+        highcharter::highchart() %>%
+          highcharter::hc_add_series_map(
+            df = geography_df(),
+            map = map_list(),
+            joinBy = "SUB_ICB_NAME",
+            value = "MEET_TARGET",
+            allowPointSelect = TRUE,
+            cursur = "pointer",
+            borderColor = "black",
+            borderWidth = 0.2,
+            tooltip = list(
+              headerFormat = "",
+              pointFormat = paste0(
+                "<b> Sub ICB location: </b> {point.SUB_ICB_NAME}<br> <b>",
+                switch(input$metric,
+                       "STAR_PU" = "Antibacterial items/STAR-PU (12 months to April 2022):</b> {point.VALUE:.2f}",
+                       "COAMOX" = "Co-amoxiclav, Cephalosporins & Quinolones (12 months to April 2022): </b> {point.VALUE:.2f}%"
+                )
+              )
+            )
+          ) %>%
+          theme_nhsbsa(palette = "gender") %>%
+          highcharter::hc_colorAxis(
+            dataClassColor = "category",
+            dataClasses = list(
+              list(from = 0, to = 0, color = "#0072CE", name = "Not met the target"), # didn't meet the target (orange)
+              list(from = 1, to = 1, color = "#AE2573", name = "Met the target") # meet the target (blue)
+            )
+          ) %>%
+          # highcharter::hc_legend(enabled = FALSE) %>%
+          highcharter::hc_legend(
+            enabled = TRUE,
+            verticalAlign = "bottom",
+            title = list(text = "12 months to April 2022")
+          ) %>%
+          highcharter::hc_plotOptions(
+            map = list(
+              events = list(
+                click = htmlwidgets::JS(
+                  paste0(
+                    "
+                function(event) {
+                  Shiny.setInputValue('", id, "-mapclick_sof', event.point.SUB_ICB_NAME);
+                }
+                "
+                  )
+                )
+              )
+            )
+          )
+        
+      }
+
+      
     })
 
     # Trend chart
@@ -294,23 +350,47 @@ mod_region_antibiotic_server <- function(id) {
     })
 
     output$sof_compare <- highcharter::renderHighchart({
-      highcharter::highchart() %>%
-        highcharter::hc_chart(type = "bar") %>%
-        highcharter::hc_plotOptions(series = list(stacking = "normal")) %>%
-        highcharter::hc_xAxis(categories = geography_compare_df()$REGION) %>%
-        highcharter::hc_add_series(
-          name = "Not Met",
-          data = geography_compare_df()$NOT_MEET
-        ) %>%
-        highcharter::hc_add_series(
-          name = "Met",
-          data = geography_compare_df()$MEET
-        ) %>%
-        theme_nhsbsa(palette = "gender") %>%
-        highcharter::hc_legend(enabled = FALSE) %>%
-        highcharter::hc_tooltip(
-          shared = TRUE
-        )
+      if(input$metric == "STAR_PU"){
+        highcharter::highchart() %>%
+          highcharter::hc_chart(type = "bar") %>%
+          highcharter::hc_plotOptions(series = list(stacking = "normal")) %>%
+          highcharter::hc_xAxis(categories = geography_compare_df()$REGION) %>%
+          highcharter::hc_add_series(
+            name = "Not Met",
+            data = geography_compare_df()$NOT_MEET,
+            color = "#0072CE"
+          ) %>%
+          highcharter::hc_add_series(
+            name = "Met",
+            data = geography_compare_df()$MEET,
+            color = "#330072"
+          ) %>%
+          theme_nhsbsa() %>%
+          highcharter::hc_legend(enabled = FALSE) %>%
+          highcharter::hc_tooltip(
+            shared = TRUE
+          )
+      }else{
+        highcharter::highchart() %>%
+          highcharter::hc_chart(type = "bar") %>%
+          highcharter::hc_plotOptions(series = list(stacking = "normal")) %>%
+          highcharter::hc_xAxis(categories = geography_compare_df()$REGION) %>%
+          highcharter::hc_add_series(
+            name = "Not Met",
+            data = geography_compare_df()$NOT_MEET,
+            color = "#0072CE"
+          ) %>%
+          highcharter::hc_add_series(
+            name = "Met",
+            data = geography_compare_df()$MEET,
+            color = "#AE2573"
+          ) %>%
+          theme_nhsbsa() %>%
+          highcharter::hc_legend(enabled = FALSE) %>%
+          highcharter::hc_tooltip(
+            shared = TRUE
+          )
+        }
     })
   })
 }

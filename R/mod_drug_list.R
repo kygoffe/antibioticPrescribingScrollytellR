@@ -19,7 +19,7 @@ mod_drug_list_ui <- function(id) {
         tooltip = tooltip_text$Amoxicillin
       ),
       tippy(
-        text = "UTIs,",
+        text = "Lower UTIs,",
         tooltip = tooltip_text$UTIs
       ),
       tippy(

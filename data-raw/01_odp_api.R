@@ -181,9 +181,10 @@ antibiotic_final_df <- antibiotic_final_df %>%
   mutate(DRUG_OF_INTEREST = case_when(
     BNF_CHEMICAL_SUBSTANCE == "0501013B0" ~ "Amoxicillin",
     BNF_CHEMICAL_SUBSTANCE %in% c(
-      "0501015P0", "0501130R0",
+      "0501015P0", "0501021A0", "0501021B0", "0501021C0",
+      "0501130R0", "0501021K0", "0501021L0", "0501021M0",
       "0501080W0", "0501070AE", "0501130S0"
-    ) ~ "UTI",
+    ) ~ "Lower UTI",
     BNF_CHEMICAL_SUBSTANCE == "0501013K0" ~ "Co-amoxiclav",
     BNF_CHEMICAL_SUBSTANCE %in% c(
       "0501021A0", "0501021B0",

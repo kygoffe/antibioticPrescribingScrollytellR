@@ -63,9 +63,10 @@ sub_icb_df <- sub_icb_df %>%
   )) %>%
   mutate(
     colour = case_when(
-      METRIC == "STAR_PU" & VALUE <= 0.87 ~ "#009639", # met target
-      METRIC == "COAMOX" & VALUE <= 10 ~ "#009639", # met target
-      TRUE ~ "#ED8B00"
+      METRIC == "STAR_PU" & VALUE <= 0.871 ~ "#330072", # met target
+      METRIC == "STAR_PU" & VALUE > 0.871 ~ "#41B6E6", # met target
+      METRIC == "COAMOX" & VALUE <= 10 ~ "#AE2573", # met target
+      METRIC == "COAMOX" & VALUE > 10 ~ "#0072CE", # met target
     )
   ) %>%
   mutate(
