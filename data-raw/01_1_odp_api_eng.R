@@ -25,7 +25,7 @@ resources_table <- metadata_repsonse$result$resources
 
 # Rolling 12months data (same way as NHS improvement)
 # April 21 (contains 12 months rolling average), May21 etc until March 2022
-resource_name_list <- resources_table$name[89:100] # Covers from May 2020 - April 2022 (need two time period for dumbbell chart)
+resource_name_list <- resources_table$name[89:101] # Covers from May 2020 - April 2022 (need two time period for dumbbell chart)
 
 # 5.1. For loop ----------------------------------------------------------------
 
@@ -100,16 +100,21 @@ for (month in resource_name_list) {
 # Currently, our data contains OOH, community as well as old CCG
 
 antibiotic_df <- antibiotic_df %>%
-  filter(stringr::str_detect(PCO_NAME, "CCG"))
+  filter(stringr::str_detect(PCO_NAME, "CCG")) %>%
+  filter(YEAR_MONTH > 202105) # only for 12 months to May 22
 
 
 antibiotic_eng_final <- antibiotic_df %>%
-  mutate(DRUG_OF_INTEREST = case_when(
-    BNF_CHEMICAL_SUBSTANCE == "0501013B0" ~ "Amoxicillin",
+  mutate(DRUG_OF_INTEREST_LUTI = case_when(
     BNF_CHEMICAL_SUBSTANCE %in% c(
-      "0501015P0", "0501130R0",
+      "0501015P0", "0501021A0", "0501021B0", "0501021C0",
+      "0501130R0", "0501021K0", "0501021L0", "0501021M0",
       "0501080W0", "0501070AE", "0501130S0"
     ) ~ "Lower UTI",
+    TRUE ~ "Other drugs"
+  )) %>%
+  mutate(DRUG_OF_INTEREST = case_when(
+    BNF_CHEMICAL_SUBSTANCE == "0501013B0" ~ "Amoxicillin",
     BNF_CHEMICAL_SUBSTANCE == "0501013K0" ~ "Co-amoxiclav",
     BNF_CHEMICAL_SUBSTANCE %in% c(
       "0501021A0", "0501021B0",
@@ -123,12 +128,30 @@ antibiotic_eng_final <- antibiotic_df %>%
       "0501120Y0"
     ) ~ "Quinolones",
     TRUE ~ "Other drugs"
-  )) %>%
-  group_by(DRUG_OF_INTEREST) %>%
-  summarise(TOTAL_ITEMS = sum(ITEMS)) %>%
+  ))
+
+
+antibiotic_eng_luti <- antibiotic_eng_final %>%
+  group_by(DRUG_OF_INTEREST_LUTI) %>%
+  summarise(TOTAL_ITEMS = sum(ITEMS, na.rm = TRUE)) %>%
   ungroup() %>%
-  mutate(STAR_PU = TOTAL_ITEMS / 34111023.4)
+  filter(DRUG_OF_INTEREST_LUTI == "Lower UTI") %>%
+  rename(DRUG_OF_INTEREST = DRUG_OF_INTEREST_LUTI)
+# exclude if practice code is empty
+# filter(PRACTICE_NAME != "UNIDENTIFIED DOCTORS")
+
+antibiotic_eng <- antibiotic_eng_final %>%
+  group_by(DRUG_OF_INTEREST) %>%
+  summarise(TOTAL_ITEMS = sum(ITEMS, na.rm = TRUE)) %>%
+  ungroup() %>%
+  filter(DRUG_OF_INTEREST != "Other drugs")
+
+
+antibiotic_eng <- bind_rows(antibiotic_eng, antibiotic_eng_luti) %>%
+  mutate(STAR_PU = TOTAL_ITEMS / 34153292.65)
 
 
 # similar enough so will keep it.......
 usethis::use_data(antibiotic_eng_final, overwrite = TRUE)
+
+usethis::use_data(antibiotic_eng, overwrite = TRUE)

@@ -378,7 +378,7 @@ mod_gp_overall_server <- function(id) {
       antibioticPrescribingScrollytellR::sub_icb_df %>%
         dplyr::filter(METRIC %in% input$metric) %>%
         dplyr::filter(SUB_ICB_NAME %in% input$ccg) %>%
-        dplyr::filter(YEAR_MONTH != "Apr-21") %>%
+        dplyr::filter(!YEAR_MONTH %in% c("Apr-21", "Mar-21", "Feb-21")) %>%
         dplyr::select(
           YEAR_MONTH,
           GEOGRAPHY = SUB_ICB_NAME,

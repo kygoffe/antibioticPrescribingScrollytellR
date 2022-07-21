@@ -178,13 +178,16 @@ antibiotic_final_df <- bind_rows(antibiotic_df_2021, antibiotic_df_2122)
 #                                        "0501120Y0"))
 
 antibiotic_final_df <- antibiotic_final_df %>%
-  mutate(DRUG_OF_INTEREST = case_when(
-    BNF_CHEMICAL_SUBSTANCE == "0501013B0" ~ "Amoxicillin",
+  mutate(DRUG_OF_INTEREST_LUTI = case_when(
     BNF_CHEMICAL_SUBSTANCE %in% c(
       "0501015P0", "0501021A0", "0501021B0", "0501021C0",
       "0501130R0", "0501021K0", "0501021L0", "0501021M0",
       "0501080W0", "0501070AE", "0501130S0"
     ) ~ "Lower UTI",
+    TRUE ~ "Other drugs"
+  )) %>%
+  mutate(DRUG_OF_INTEREST = case_when(
+    BNF_CHEMICAL_SUBSTANCE == "0501013B0" ~ "Amoxicillin",
     BNF_CHEMICAL_SUBSTANCE == "0501013K0" ~ "Co-amoxiclav",
     BNF_CHEMICAL_SUBSTANCE %in% c(
       "0501021A0", "0501021B0",
@@ -202,15 +205,30 @@ antibiotic_final_df <- antibiotic_final_df %>%
 
 
 # Prior to calculate STAR-PU per practice, I need to aggregate number of items per month per practice
+antibiotic_practice_luti <- antibiotic_final_df %>%
+  group_by(
+    YEAR_MONTH, SUB_ICB_CODE, SUB_ICB_NAME, PRACTICE_NAME,
+    PRACTICE_CODE, DRUG_OF_INTEREST_LUTI
+  ) %>%
+  summarise(TOTAL_ITEMS = sum(ITEMS, na.rm = TRUE)) %>%
+  ungroup() %>%
+  filter(DRUG_OF_INTEREST_LUTI == "Lower UTI") %>%
+  rename(DRUG_OF_INTEREST = DRUG_OF_INTEREST_LUTI)
+# exclude if practice code is empty
+# filter(PRACTICE_NAME != "UNIDENTIFIED DOCTORS")
+
 antibiotic_practice <- antibiotic_final_df %>%
   group_by(
     YEAR_MONTH, SUB_ICB_CODE, SUB_ICB_NAME, PRACTICE_NAME,
     PRACTICE_CODE, DRUG_OF_INTEREST
   ) %>%
   summarise(TOTAL_ITEMS = sum(ITEMS, na.rm = TRUE)) %>%
-  ungroup() # %>%
-# exclude if practice code is empty
-# filter(PRACTICE_NAME != "UNIDENTIFIED DOCTORS")
+  ungroup() %>%
+  filter(DRUG_OF_INTEREST != "Other drugs")
+
+
+antibiotic_practice <- bind_rows(antibiotic_practice, antibiotic_practice_luti)
+
 
 
 # Amoxicillin (0501013B0)
@@ -346,20 +364,20 @@ antibiotic_icb_final_pivot_wider <- antibiotic_icb_final_pivot_wider %>%
 
 
 ## Only for checking
-tst_icb <- sub_icb_df %>%
-  filter(YEAR_MONTH %in% c("Apr-21", "Apr-22")) %>%
-  distinct(YEAR_MONTH, SUB_ICB_CODE, STARPU_NUM, STARPU_DENOM)
-
-check <- tst %>% left_join(tst_icb,
-  by = c("YEAR_MONTH", "SUB_ICB_CODE")
-)
-
-##### After putting into the chart. need to check this.
-##### I need to manually check to get drug count is correct (when I report practice. ccg. england level )
-check_with_open_prescribing <-
-  check %>%
-  filter(ODP_TOTALS != STARPU_NUM) %>%
-  mutate(p1 = ODP_TOTALS / STARPU_DENOM, p2 = STARPU_NUM / STARPU_DENOM)
+# tst_icb <- sub_icb_df %>%
+#   filter(YEAR_MONTH %in% c("Apr-21", "Apr-22")) %>%
+#   distinct(YEAR_MONTH, SUB_ICB_CODE, STARPU_NUM, STARPU_DENOM)
+#
+# check <- tst %>% left_join(tst_icb,
+#   by = c("YEAR_MONTH", "SUB_ICB_CODE")
+# )
+#
+# ##### After putting into the chart. need to check this.
+# ##### I need to manually check to get drug count is correct (when I report practice. ccg. england level )
+# check_with_open_prescribing <-
+#   check %>%
+#   filter(ODP_TOTALS != STARPU_NUM) %>%
+#   mutate(p1 = ODP_TOTALS / STARPU_DENOM, p2 = STARPU_NUM / STARPU_DENOM)
 
 # GP items breakdown (a, uti, 3cs )
 usethis::use_data(antibiotic_practice_final, overwrite = TRUE)

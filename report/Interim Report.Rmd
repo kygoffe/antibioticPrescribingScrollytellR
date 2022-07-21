@@ -3,6 +3,7 @@ title: 'MSc Data Science: Interim report'
 author: "Kayoung Goffe"
 date: '2022-06-07'
 output:
+  word_document: default
   pdf_document: default
 link-citations: yes
 bibliography: reference.bib

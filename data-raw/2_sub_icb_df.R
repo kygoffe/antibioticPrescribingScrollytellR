@@ -35,7 +35,7 @@ sub_icb_df <- list.files(
   ) %>%
   mutate(YEAR_MONTH = gsub("_", "-", YEAR_MONTH))
 
-x <- c("Apr-21", "May-21", "Jun-21", "Jul-21", "Aug-21", "Sep-21", "Oct-21", "Nov-21", "Dec-21", "Jan-22", "Feb-22", "Mar-22", "Apr-22")
+x <- c("Feb-21", "Mar-21", "Apr-21", "May-21", "Jun-21", "Jul-21", "Aug-21", "Sep-21", "Oct-21", "Nov-21", "Dec-21", "Jan-22", "Feb-22", "Mar-22", "Apr-22")
 
 sub_icb_df <- sub_icb_df %>%
   mutate(YEAR_MONTH = factor(YEAR_MONTH, levels = x)) %>%

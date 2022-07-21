@@ -11,6 +11,8 @@ mod_definitions_ui <- function(id) {
   ns <- NS(id)
   tagList(
     h2_tabstop("Definitions"),
+    p(tags$b("SOF")),
+    p(tags$b("STAR-PU definition needs to be added")),
     p(tags$b("List of drugs used to define Amoxicillin, UTI, Co-amoxiclav, cephalosporin & quinolone")),
     p(
       "Amoxicillin",
@@ -20,7 +22,6 @@ mod_definitions_ui <- function(id) {
     ),
     p(
       "Lower UTI",
-      
       tags$li("Pivmecillinam hydrochloride (0501015P0)"),
       tags$li("Cefaclor (0501021A0)"),
       tags$li("Cefadroxil	(0501021B0)"),
