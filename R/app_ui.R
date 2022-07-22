@@ -45,7 +45,6 @@ app_ui <- function(request) {
           tabPanel(
             title = "Article",
             mod_intro_antibiotic_ui("intro_antibiotic_1"),
-            mod_criteria_selection_ui("criteria_selection_1"),
             mod_region_antibiotic_ui("region_antibiotic_1"),
             mod_ccg_selection_ui("ccg_selection_1"),
             mod_gp_overall_ui("gp_overall_1"),

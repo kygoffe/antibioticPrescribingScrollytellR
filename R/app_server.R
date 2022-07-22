@@ -6,9 +6,8 @@
 #' @noRd
 app_server <- function(input, output, session) {
   # Your application server logic
+  metric_sel <- mod_intro_antibiotic_server("intro_antibiotic_1")
   mod_intro_antibiotic_server("intro_antibiotic_1")
-  mod_criteria_selection_server("criteria_selection_1")
-  metric_sel <- mod_criteria_selection_server("criteria_selection_1")
   mod_region_antibiotic_server("region_antibiotic_1", metric_sel)
   mod_ccg_selection_server("ccg_selection_1")
   ccg_sel <- mod_ccg_selection_server("ccg_selection_1")

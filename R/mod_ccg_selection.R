@@ -10,11 +10,13 @@
 mod_ccg_selection_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    nhs_selectInput(
-      inputId = ns("ccg"),
-      label = "Sub ICB locations",
-      choices = c(sort(unique(antibioticPrescribingScrollytellR::gp_merge_df$SUB_ICB_NAME))),
-      full_width = TRUE
+    nhs_card(
+      nhs_selectInput(
+        inputId = ns("ccg"),
+        label = "Sub ICB locations",
+        choices = c(sort(unique(antibioticPrescribingScrollytellR::gp_merge_df$SUB_ICB_NAME))),
+        full_width = TRUE
+      )
     )
   )
 }
