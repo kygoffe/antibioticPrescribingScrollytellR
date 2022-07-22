@@ -21,29 +21,22 @@ mod_region_antibiotic_ui <- function(id) {
     nhs_card(
       heading = p("Geographical variation", textOutput(outputId = ns("region_text"), inline = TRUE)),
       # two drop down menu
-      nhs_grid_3_col(
-        nhs_selectInput(
-          inputId = ns("year_month"),
-          label = "12 months to",
-          choices = c("Jan-22", "Feb-22", "Mar-22", "Apr-22"),
-          full_width = TRUE,
-          selected = "Apr-22"
-        ),
-        nhs_selectInput(
-          inputId = ns("metric"),
-          label = "Metric",
-          choices = c(
-            "Antibacterial items/STAR-PU" = "STAR_PU",
-            "Co-amoxiclav, Cephalosporins & Quinolones" = "COAMOX"
-          ),
-          full_width = TRUE
-        ),
-        nhs_selectInput(
-          inputId = ns("region"),
-          label = "Region",
-          choices = c("All", sort(unique(antibioticPrescribingScrollytellR::map_df$REGION))),
-          full_width = TRUE
-        )
+      # nhs_grid_2_col(
+      #   nhs_selectInput(
+      #     inputId = ns("metric"),
+      #     label = "Metric",
+      #     choices = c(
+      #       "Antibacterial items/STAR-PU" = "STAR_PU",
+      #       "Co-amoxiclav, Cephalosporins & Quinolones" = "COAMOX"
+      #     ),
+      #     full_width = TRUE
+      #   ),
+      nhs_selectInput(
+        inputId = ns("region"),
+        label = "Region",
+        choices = c("All", sort(unique(antibioticPrescribingScrollytellR::map_df$REGION))),
+        full_width = TRUE
+        # )
       ),
 
       # map
@@ -78,39 +71,38 @@ mod_region_antibiotic_ui <- function(id) {
 #' ccg_antibiotic Server Functions
 #'
 #' @noRd
-mod_region_antibiotic_server <- function(id) {
+mod_region_antibiotic_server <- function(id, metric_sel) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     # add title
     output$region_text <- renderText({
-      text <- switch(input$metric,
+      req(metric_sel())
+      observe(print(metric_sel()))
+
+      text <- switch(metric_sel(),
         "STAR_PU" = "Antibacterial items/STAR-PU",
         "COAMOX" = "Co-amoxiclav, Cephalosporins & Quinolones"
       )
       return(text)
     })
 
-    # add which month
-    output$month <- renderText({
-      return(input$year_month)
-    })
+    # observe(print(text()))
 
     geography_df <- reactive({
       req(input$region)
-      req(input$metric)
-      req(input$year_month)
+      req(metric_sel())
 
       # Three choices of geographies
       if (input$region == "All") {
         antibioticPrescribingScrollytellR::sub_icb_df %>%
-          dplyr::filter(METRIC == input$metric) %>%
-          dplyr::filter(YEAR_MONTH == input$year_month)
+          dplyr::filter(METRIC == metric_sel()) %>%
+          dplyr::filter(YEAR_MONTH == "Apr-22")
       } else {
         antibioticPrescribingScrollytellR::sub_icb_df %>%
           dplyr::filter(REGION == input$region) %>%
-          dplyr::filter(METRIC == input$metric) %>%
-          dplyr::filter(YEAR_MONTH == input$year_month)
+          dplyr::filter(METRIC == metric_sel()) %>%
+          dplyr::filter(YEAR_MONTH == "Apr-22")
       }
     })
 
@@ -136,9 +128,9 @@ mod_region_antibiotic_server <- function(id) {
     # observe(print(map_list()))
 
     output$map_chart <- highcharter::renderHighchart({
-      req(input$metric)
+      req(metric_sel())
 
-      if (input$metric == "STAR_PU") {
+      if (metric_sel() == "STAR_PU") {
         highcharter::highchart() %>%
           highcharter::hc_add_series_map(
             df = geography_df(),
@@ -153,7 +145,7 @@ mod_region_antibiotic_server <- function(id) {
               headerFormat = "",
               pointFormat = paste0(
                 "<b> Sub ICB location: </b> {point.SUB_ICB_NAME}<br> <b>",
-                switch(input$metric,
+                switch(metric_sel(),
                   "STAR_PU" = "Antibacterial items/STAR-PU (12 months to {point.YEAR_MONTH}):</b> {point.VALUE:.2f}",
                   "COAMOX" = "Co-amoxiclav, Cephalosporins & Quinolones (12 months to {point.YEAR_MONTH}): </b> {point.VALUE:.2f}%"
                 )
@@ -172,7 +164,7 @@ mod_region_antibiotic_server <- function(id) {
           highcharter::hc_legend(
             enabled = TRUE,
             verticalAlign = "bottom",
-            title = list(text = paste("12 months to", input$year_month))
+            title = list(text = paste("12 months to", "Apr-22"))
           ) %>%
           highcharter::hc_plotOptions(
             map = list(
@@ -204,7 +196,7 @@ mod_region_antibiotic_server <- function(id) {
               headerFormat = "",
               pointFormat = paste0(
                 "<b> Sub ICB location: </b> {point.SUB_ICB_NAME}<br> <b>",
-                switch(input$metric,
+                switch(metric_sel(),
                   "STAR_PU" = "Antibacterial items/STAR-PU (12 months to {point.YEAR_MONTH}):</b> {point.VALUE:.2f}",
                   "COAMOX" = "Co-amoxiclav, Cephalosporins & Quinolones (12 months to {point.YEAR_MONTH}): </b> {point.VALUE:.2f}%"
                 )
@@ -223,7 +215,7 @@ mod_region_antibiotic_server <- function(id) {
           highcharter::hc_legend(
             enabled = TRUE,
             verticalAlign = "bottom",
-            title = list(text = paste("12 months to", input$year_month))
+            title = list(text = paste("12 months to", "Apr-22"))
           ) %>%
           highcharter::hc_plotOptions(
             map = list(
@@ -249,7 +241,7 @@ mod_region_antibiotic_server <- function(id) {
         req(input$mapclick_sof)
 
 
-        reference_value <- switch(input$metric,
+        reference_value <- switch(metric_sel(),
           "STAR_PU" = 0.871,
           "COAMOX" = 10
         )
@@ -257,8 +249,8 @@ mod_region_antibiotic_server <- function(id) {
         # add min, max value (28062022)
         max_val <- reactive({
           antibioticPrescribingScrollytellR::sub_icb_df %>%
-            dplyr::filter(METRIC == input$metric) %>%
-            dplyr::filter(YEAR_MONTH == input$year_month) %>%
+            dplyr::filter(METRIC == metric_sel()) %>%
+            dplyr::filter(YEAR_MONTH == "Apr-22") %>%
             dplyr::summarise(max(VALUE)) %>%
             dplyr::ungroup() %>%
             dplyr::pull()
@@ -268,7 +260,8 @@ mod_region_antibiotic_server <- function(id) {
         # define the dataset for the selected geography
         antibioticPrescribingScrollytellR::sub_icb_df %>%
           dplyr::filter(SUB_ICB_NAME == input$mapclick_sof &
-            METRIC == input$metric) %>%
+            METRIC == metric_sel() &
+            !YEAR_MONTH %in% c("Feb-21", "Mar-21", "Apr-21")) %>%
           dplyr::mutate(
             MEET = ifelse(test = VALUE < reference_value, "Met the target", "Not met the target"),
             METRIC_TOOLTIP = ifelse(METRIC == "STAR_PU", "Antibacterial items/STAR-PU",
@@ -300,7 +293,7 @@ mod_region_antibiotic_server <- function(id) {
               value = reference_value, color = "#8A1538", width = 1,
               dashStyle = "shortdash"
             )),
-            labels = list(format = switch(input$metric,
+            labels = list(format = switch(metric_sel(),
               "STAR_PU" = "{value:.1f}",
               "COAMOX" = "{value:.0f}%"
             ))
@@ -352,8 +345,8 @@ mod_region_antibiotic_server <- function(id) {
 
     geography_compare_df <- reactive({
       antibioticPrescribingScrollytellR::sub_icb_df %>%
-        dplyr::filter(METRIC == input$metric) %>%
-        dplyr::filter(YEAR_MONTH == input$year_month) %>%
+        dplyr::filter(METRIC == metric_sel()) %>%
+        dplyr::filter(YEAR_MONTH == "Apr-22") %>%
         dplyr::group_by(REGION) %>%
         dplyr::summarise(
           MEET = sum(MEET_TARGET),
@@ -363,7 +356,7 @@ mod_region_antibiotic_server <- function(id) {
     })
 
     output$sof_compare <- highcharter::renderHighchart({
-      if (input$metric == "STAR_PU") {
+      if (metric_sel() == "STAR_PU") {
         highcharter::highchart() %>%
           highcharter::hc_chart(type = "bar") %>%
           highcharter::hc_plotOptions(series = list(stacking = "normal")) %>%

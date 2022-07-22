@@ -18,16 +18,16 @@ mod_gp_overall_ui <- function(id) {
       heading = "Antimicrobial Stewardship data reporting against NHS AMR metrics",
 
       # requires three dropdown memu
-      nhs_grid_3_col(
-        nhs_selectInput(
-          inputId = ns("metric"),
-          label = "Metric",
-          choices = c(
-            "Antibacterial items/STAR PU" = "STAR_PU",
-            "Co-amoxiclav, Cephalosporins & Quinolones" = "COAMOX"
-          ),
-          full_width = TRUE
-        ),
+      nhs_grid_2_col(
+        # nhs_selectInput(
+        #   inputId = ns("metric"),
+        #   label = "Metric",
+        #   choices = c(
+        #     "Antibacterial items/STAR PU" = "STAR_PU",
+        #     "Co-amoxiclav, Cephalosporins & Quinolones" = "COAMOX"
+        #   ),
+        #   full_width = TRUE
+        # ),
         nhs_selectInput(
           inputId = ns("ccg"),
           label = "Sub ICB locations",
@@ -72,7 +72,7 @@ mod_gp_overall_ui <- function(id) {
 #' gp_overall Server Functions
 #'
 #' @noRd
-mod_gp_overall_server <- function(id) {
+mod_gp_overall_server <- function(id, metric_sel) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -88,18 +88,18 @@ mod_gp_overall_server <- function(id) {
 
     # generate column chart data frame
     gp_sel <- reactive({
-      req(input$metric)
+      req(metric_sel())
       # req(input$ccg)
       antibioticPrescribingScrollytellR::gp_merge_df %>%
         dplyr::filter(YEAR_MONTH %in% "Apr-22") %>%
         dplyr::filter(SUB_ICB_NAME %in% input$ccg) %>%
-        dplyr::filter(METRIC %in% input$metric) %>%
+        dplyr::filter(METRIC %in% metric_sel()) %>%
         dplyr::mutate(IMD_RANK = as.numeric(IMD_RANK))
     })
 
 
     gp_list <- reactive({
-      # req(input$metric)
+      # req(metric_sel())
       req(input$ccg)
       antibioticPrescribingScrollytellR::gp_merge_df %>%
         dplyr::filter(YEAR_MONTH %in% "Apr-22") %>%
@@ -124,7 +124,7 @@ mod_gp_overall_server <- function(id) {
     # filter data based on practice
 
     gp_df <- reactive({
-      req(input$metric)
+      req(metric_sel())
       req(input$ccg)
       req(input$gp)
 
@@ -137,12 +137,12 @@ mod_gp_overall_server <- function(id) {
     })
 
     ccg_df <- reactive({
-      req(input$metric)
+      req(metric_sel())
       req(input$ccg)
 
       antibioticPrescribingScrollytellR::sub_icb_df %>%
         dplyr::filter(YEAR_MONTH %in% "Apr-22") %>%
-        dplyr::filter(METRIC %in% input$metric) %>%
+        dplyr::filter(METRIC %in% metric_sel()) %>%
         dplyr::filter(SUB_ICB_NAME %in% input$ccg) %>%
         dplyr::select(YEAR_MONTH,
           GEOGRAPHY = SUB_ICB_NAME,
@@ -151,10 +151,10 @@ mod_gp_overall_server <- function(id) {
     })
 
     eng_df <- reactive({
-      req(input$metric)
+      req(metric_sel())
       antibioticPrescribingScrollytellR::df_eng_pivot %>%
         dplyr::filter(YEAR_MONTH %in% "Apr-22") %>%
-        dplyr::filter(METRIC %in% input$metric) %>%
+        dplyr::filter(METRIC %in% metric_sel()) %>%
         dplyr::select(-METRIC) %>%
         dplyr::mutate(GEOGRAPHY = "England")
     })
@@ -166,7 +166,7 @@ mod_gp_overall_server <- function(id) {
 
 
     reference_value <- reactive({
-      switch(input$metric,
+      switch(metric_sel(),
         "STAR_PU" = 0.871,
         "COAMOX" = 10
       )
@@ -174,7 +174,7 @@ mod_gp_overall_server <- function(id) {
 
     max_val <- reactive({
       antibioticPrescribingScrollytellR::gp_merge_df %>%
-        dplyr::filter(METRIC %in% input$metric) %>%
+        dplyr::filter(METRIC %in% metric_sel()) %>%
         dplyr::filter(dplyr::between(VALUE, quantile(VALUE, .01), quantile(VALUE, .99))) %>%
         dplyr::summarise(max(VALUE)) %>%
         dplyr::ungroup() %>%
@@ -206,7 +206,7 @@ mod_gp_overall_server <- function(id) {
         highcharter::hc_yAxis(
           min = 0,
           max = max_val(),
-          title = list(text = switch(input$metric,
+          title = list(text = switch(metric_sel(),
             "STAR_PU" = "Items/STAR-PU",
             "COAMOX" = "% of items"
           )),
@@ -217,7 +217,7 @@ mod_gp_overall_server <- function(id) {
         ) %>%
         highcharter::hc_tooltip(
           shared = TRUE,
-          pointFormat = switch(input$metric,
+          pointFormat = switch(metric_sel(),
             "STAR-PU" = "<b>STAR_PU: {point.y:.2f}</b>",
             "COAMOX" = "<b>{point.y:.1f}%</b>"
           )
@@ -229,7 +229,7 @@ mod_gp_overall_server <- function(id) {
     output$bar_chart_text <- renderUI({
       tags$text(
         class = "highcharts-caption",
-        switch(input$metric,
+        switch(metric_sel(),
           "STAR-PU" = "12 months to April 2022, add text for the bar chart",
           "COAMOX" = "12 months to April 2022, add text for the bar chart"
         )
@@ -244,7 +244,7 @@ mod_gp_overall_server <- function(id) {
 
     # Define IMD tooltip text
     lsoa_metric_text <- reactive({
-      if (input$metric == "STAR_PU") {
+      if (metric_sel() == "STAR_PU") {
         paste0(
           "<b>Item STAR-PU:</b> {point.VALUE:,.2f}"
         )
@@ -318,7 +318,7 @@ mod_gp_overall_server <- function(id) {
         highcharter::hc_yAxis(
           min = 0,
           max = max_val(),
-          title = list(text = switch(input$metric,
+          title = list(text = switch(metric_sel(),
             "STAR_PU" = "Items/STAR-PU",
             "COAMOX" = "% of items"
           )),
@@ -354,11 +354,11 @@ mod_gp_overall_server <- function(id) {
     # data for trend chart
 
     gp_trend <- reactive({
-      req(input$metric)
+      req(metric_sel())
       req(input$gp)
 
       antibioticPrescribingScrollytellR::gp_merge_df %>%
-        dplyr::filter(METRIC %in% input$metric) %>%
+        dplyr::filter(METRIC %in% metric_sel()) %>%
         dplyr::filter(PRACTICE_NAME %in% input$gp) %>%
         dplyr::filter(YEAR_MONTH != "Apr-21") %>%
         dplyr::select(
@@ -372,11 +372,11 @@ mod_gp_overall_server <- function(id) {
     })
 
     ccg_trend <- reactive({
-      req(input$metric)
+      req(metric_sel())
       req(input$ccg)
 
       antibioticPrescribingScrollytellR::sub_icb_df %>%
-        dplyr::filter(METRIC %in% input$metric) %>%
+        dplyr::filter(METRIC %in% metric_sel()) %>%
         dplyr::filter(SUB_ICB_NAME %in% input$ccg) %>%
         dplyr::filter(!YEAR_MONTH %in% c("Apr-21", "Mar-21", "Feb-21")) %>%
         dplyr::select(
@@ -392,10 +392,10 @@ mod_gp_overall_server <- function(id) {
     # observe(print(ccg_trend()))
 
     eng_trend <- reactive({
-      req(input$metric)
+      req(metric_sel())
 
       antibioticPrescribingScrollytellR::df_eng_pivot %>%
-        dplyr::filter(METRIC %in% input$metric) %>%
+        dplyr::filter(METRIC %in% metric_sel()) %>%
         dplyr::mutate(
           GEOGRAPHY = "England",
           GEOGRAPHY_TYPE = "England"
@@ -426,7 +426,7 @@ mod_gp_overall_server <- function(id) {
         theme_nhsbsa(stack = NA) %>%
         highcharter::hc_tooltip(
           shared = TRUE,
-          pointFormat = switch(input$metric,
+          pointFormat = switch(metric_sel(),
             "STAR_PU" = "<b>{point.GEOGRAPHY}: {point.y:.2f} </b> <br>",
             "COAMOX" = "<b>{point.GEOGRAPHY}: {point.y:.1f}%</b> <br> "
           )
@@ -434,7 +434,7 @@ mod_gp_overall_server <- function(id) {
         highcharter::hc_yAxis(
           min = 0,
           max = max_val(),
-          title = list(text = switch(input$metric,
+          title = list(text = switch(metric_sel(),
             "STAR_PU" = "Items/STAR-PU",
             "COAMOX" = "% of items"
           )),
@@ -453,7 +453,7 @@ mod_gp_overall_server <- function(id) {
     output$trend_chart_text <- renderUI({
       tags$text(
         class = "highcharts-caption",
-        switch(input$metric,
+        switch(metric_sel(),
           "STAR_PU" = "add text for the trend chart",
           "COAMOX" = "add text for the trend chart"
         )
@@ -511,7 +511,7 @@ mod_gp_overall_server <- function(id) {
         highcharter::hc_yAxis(
           min = 0,
           max = max_val(),
-          title = list(text = switch(input$metric,
+          title = list(text = switch(metric_sel(),
             "STAR_PU" = "Items/STAR-PU",
             "COAMOX" = "% of items"
           )),

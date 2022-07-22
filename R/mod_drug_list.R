@@ -89,7 +89,7 @@ mod_drug_list_server <- function(id, gp_val) {
     ns <- session$ns
 
     output$selected_gp <- reactive({
-      rep(gp_val())
+      req(gp_val())
 
       antibioticPrescribingScrollytellR::antibiotic_practice_final %>%
         dplyr::filter(YEAR_MONTH == "Apr-22") %>%
