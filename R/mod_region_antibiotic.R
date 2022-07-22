@@ -71,14 +71,14 @@ mod_region_antibiotic_ui <- function(id) {
 #' ccg_antibiotic Server Functions
 #'
 #' @noRd
-mod_region_antibiotic_server <- function(id, metric_sel) {
+mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     # add title
     output$region_text <- renderText({
       req(metric_sel())
-      observe(print(metric_sel()))
+      # observe(print(metric_sel()))
 
       text <- switch(metric_sel(),
         "STAR_PU" = "Antibacterial items/STAR-PU",
