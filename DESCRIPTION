@@ -29,7 +29,8 @@ Imports:
     janitor,
     reactable,
     plan,
-    rsvg
+    rsvg,
+    zoo
 Remotes:
     nhsbsa-data-analytics/nhsbsaR
     statistiekcbs/scrollytell

@@ -32,19 +32,13 @@ mod_gp_overall_ui <- function(id) {
       # scatterplot - practice starpu vs imd rank
       highcharter::highchartOutput(
         outputId = ns("metric_quintile_chart"),
-        height = "250px"
+        height = "300px"
       ),
       shiny::htmlOutput(ns("trend_chart_text")),
-      # trend chart
+      # item trend chart
       highcharter::highchartOutput(
-        outputId = ns("trend_chart"),
-        height = "250px"
-      ),
-      mod_nhs_download_ui(id = ns("gp_overall_download")),
-      tags$text(
-        class = "highcharts-caption",
-        style = "font-size: 9pt;",
-        ""
+        outputId = ns("item_trend"),
+        height = "300px"
       )
     )
   )
@@ -53,7 +47,7 @@ mod_gp_overall_ui <- function(id) {
 #' gp_overall Server Functions
 #'
 #' @noRd
-mod_gp_overall_server <- function(id, metric_sel, ccg_sel) {
+mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -63,25 +57,36 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_sel) {
       return(t)
     })
 
+    observe(print(ccg_selected())) # tibble - maybe i should change to character
+
+    ccg_selected_list <- reactive({
+      ccg_selected()
+    })
+
 
     # generate column chart data frame
     gp_sel <- reactive({
       req(metric_sel())
-      req(ccg_sel())
+      req(ccg_selected())
       antibioticPrescribingScrollytellR::gp_merge_df %>%
         dplyr::filter(YEAR_MONTH %in% "Apr-22") %>%
-        dplyr::filter(SUB_ICB_NAME %in% ccg_sel()) %>%
+        dplyr::filter(SUB_ICB_NAME %in% ccg_selected_list()) %>%
         dplyr::filter(METRIC %in% metric_sel()) %>%
         dplyr::mutate(IMD_RANK = as.numeric(IMD_RANK))
     })
 
+    observe(print(gp_sel()))
+
     gp_list <- reactive({
       req(metric_sel())
-      req(ccg_sel())
+      req(ccg_selected())
       antibioticPrescribingScrollytellR::gp_merge_df %>%
         dplyr::filter(YEAR_MONTH %in% "Apr-22") %>%
-        dplyr::filter(SUB_ICB_NAME %in% ccg_sel())
+        dplyr::filter(SUB_ICB_NAME %in% ccg_selected_list())
     })
+
+    observe(print(gp_list()))
+
 
     # fill the name of GP
     observeEvent(
@@ -102,7 +107,7 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_sel) {
 
     gp_df <- reactive({
       req(metric_sel())
-      req(ccg_sel())
+      req(ccg_selected())
       req(input$gp)
 
       gp_sel() %>%
@@ -115,12 +120,12 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_sel) {
 
     ccg_df <- reactive({
       req(metric_sel())
-      req(ccg_sel())
+      req(ccg_selected())
 
       antibioticPrescribingScrollytellR::sub_icb_df %>%
         dplyr::filter(YEAR_MONTH %in% "Apr-22") %>%
         dplyr::filter(METRIC %in% metric_sel()) %>%
-        dplyr::filter(SUB_ICB_NAME %in% ccg_sel()) %>%
+        dplyr::filter(SUB_ICB_NAME %in% ccg_selected_list()) %>%
         dplyr::select(YEAR_MONTH,
           GEOGRAPHY = SUB_ICB_NAME,
           VALUE
@@ -350,11 +355,11 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_sel) {
 
     ccg_trend <- reactive({
       req(metric_sel())
-      req(ccg_sel())
+      req(ccg_selected())
 
       antibioticPrescribingScrollytellR::sub_icb_df %>%
         dplyr::filter(METRIC %in% metric_sel()) %>%
-        dplyr::filter(SUB_ICB_NAME %in% ccg_sel()) %>%
+        dplyr::filter(SUB_ICB_NAME %in% ccg_selected()) %>%
         dplyr::filter(!YEAR_MONTH %in% c("Apr-21", "Mar-21", "Feb-21")) %>%
         dplyr::select(
           YEAR_MONTH,
@@ -524,6 +529,65 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_sel) {
         )
     })
 
+    item_plot_df <- reactive({
+      req(input$gp)
+
+      antibioticPrescribingScrollytellR::antibiotic_practice_item_count %>%
+        dplyr::select(-PRACTICE_NAME) %>%
+        dplyr::mutate(
+          YEAR_MONTH_DATE =
+            as.Date(paste0(as.character(YEAR_MONTH), "01"),
+              format = "%Y%m%d"
+            )
+        ) %>%
+        dplyr::inner_join(
+          antibioticPrescribingScrollytellR::gp_merge_df %>%
+            dplyr::distinct(PRACTICE_CODE, PRACTICE_NAME),
+          by = c("PRACTICE_CODE")
+        ) %>%
+        dplyr::filter(PRACTICE_NAME == input$gp)
+    })
+
+    output$item_trend <- highcharter::renderHighchart({
+      req(gp_val())
+
+      item_plot_df() %>%
+        highcharter::hchart(
+          type = "line",
+          highcharter::hcaes(
+            x = YEAR_MONTH_DATE,
+            y = TOTAL_ITEMS,
+            group = DRUG_OF_INTEREST
+          )
+        ) %>%
+        theme_nhsbsa(stack = NA) %>%
+        highcharter::hc_xAxis(
+          title = list(
+            text = list("Year month")
+          )
+        ) %>%
+        highcharter::hc_yAxis(
+          title = list(
+            text = "Number of items"
+          )
+        ) %>%
+        highcharter::hc_tooltip(
+          useHTML = TRUE,
+          formatter = htmlwidgets::JS(
+            "
+            function(){
+
+                outHTML =
+                '<b> Time period: </b>' + (this.point.YEAR_MONTH_DATE) + '<br>' +
+                '<b> Drug: </b>' + (this.point.DRUG_OF_INTEREST) + '<br>' +
+                '<b> Number of items: </b>' + Highcharts.numberFormat(this.point.TOTAL_ITEMS,0)
+
+              return(outHTML)
+            }
+            "
+          )
+        )
+    })
 
 
 

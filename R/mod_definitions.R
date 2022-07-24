@@ -10,53 +10,93 @@
 mod_definitions_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2_tabstop("Definitions"),
-    p(tags$b("SOF")),
-    p(tags$b("STAR-PU definition needs to be added")),
-    p(tags$b("List of drugs used to define Amoxicillin, UTI, Co-amoxiclav, cephalosporin & quinolone")),
+    h2_tabstop("Glossary"),
     p(
-      "Amoxicillin",
-      tags$ul(
-        tags$li("Amoxicillin (0501013B0)")
-      )
+      tags$b(
+        enurl(
+          text = "Antibiotics",
+          url = "https://www.nhs.uk/conditions/antibiotics/"
+        )
+      ),
+      br(),
+      "Antibiotics are used to treat or prevent some types of bacterial infection.",
+      "they work by killing bacteria or preventing "
     ),
     p(
-      "Lower UTI",
-      tags$li("Pivmecillinam hydrochloride (0501015P0)"),
-      tags$li("Cefaclor (0501021A0)"),
-      tags$li("Cefadroxil	(0501021B0)"),
-      tags$li("Cefixime	(0501021C0)"),
-      tags$li("Cefuroxime Axetil (0501021K0)"),
-      tags$li("Cefalexin (0501021L0)"),
-      tags$li("Cefradine (0501021M0)"),
-      tags$li("Nitrofurantoin (0501130R0)"),
-      tags$li("Trimethoprim (0501080W0)"),
-      tags$li("Fosfomycin trometamol (0501070AE)"),
-      tags$li("Fosfomycin calcium (0501130S0)")
+      tags$b(
+        enurl(
+          text = "Co-amoxiclav",
+          url = "https://www.nhs.uk/medicines/co-amoxiclav/"
+        )
+      ),
+      br(),
+      "Co-amoxiclav is a combination antibiotic used for bacterial infections. ",
+      "It contains amoxicillin (an antibiotic from the penicillin group of medicines) ",
+      "mixed with clavulanic acid."
     ),
     p(
-      "Co-amoxiclav",
-      tags$li("Amoxicillin/clavulanic acid) (0501013K0)"),
+      tags$b(
+        enurl(
+          text = "Cephalosporins",
+          url = "https://bnf.nice.org.uk/treatment-summaries/cephalosporins/"
+        )
+      ),
+      br(),
+      "The cephalosporins are broad-spectrum antibiotics which are used for ",
+      "the treatment of septicaemia, pneumonia, meningitis, ",
+      "biliary-tract infections, peritonitis, and urinary-tract infections. ",
+      "The pharmacology of the cephalosporins is similar to that of the penicillins."
     ),
     p(
-      "Cephalosporin",
-      tags$li("Cefaclor (0501021A0)"),
-      tags$li("Cefadroxil (0501021B0)"),
-      tags$li("Cefixime (0501021C0)"),
-      tags$li("Cefotaxime sodium (0501021D0)"),
-      tags$li("Ceftriaxone sodium (0501021G0)"),
-      tags$li("Cefuroxime sodium (0501021J0)"),
-      tags$li("Cefuroxime axetil (0501021K0)"),
-      tags$li("Cefalexin (0501021L0)"),
-      tags$li("Cefradine (0501021M0)")
+      tags$b(
+        enurl(
+          text = "Quinolones",
+          url = "https://bnf.nice.org.uk/treatment-summaries/quinolones/"
+        )
+      ),
+      br(),
+      "In the UK, only fluoroquinolones are available, such as ",
+      enurl(
+        text = "ciprofloxacin.",
+        url = "https://www.nhs.uk/medicines/ciprofloxacin/"
+      ),
+      "They are used to treat serious infections, or infections when other antibiotics ",
+      "have not worked."
     ),
     p(
-      "Quinolones",
-      tags$li("Ciprofloxacin (0501120L0)"),
-      tags$li("Ofloxacin (0501120P0)"),
-      tags$li("Norfloxacin (0501120Q0)"),
-      tags$li("Levofloxacin (0501120X0)"),
-      tags$li("Moxifloxacin (0501120Y0)")
+      tags$b(
+        enurl(
+          text = "STAR-PU",
+          url = "https://www.nhs.uk/scorecard/12030"
+        )
+      ),
+      br(),
+      "Average daily quantity of Hypnotics prescribed per Specific Therapeutic group ",
+      "Age-sex Related Prescribing Unit (STAR PU)"
+    ),
+    p(
+      tags$b(
+        enurl(
+          text = "STAR-PU",
+          url = "https://www.nhs.uk/scorecard/12030"
+        )
+      ),
+      br(),
+      "Average daily quantity of Hypnotics prescribed per Specific Therapeutic group ",
+      "Age-sex Related Prescribing Unit (STAR PU)"
+    ),
+    p(
+      tags$b(
+        enurl(
+          text = "Integrated Care Boards",
+          url = "https://www.england.nhs.uk/integratedcare/what-is-integrated-care/"
+        )
+      ),
+      br(),
+      "These are statutory NHS organisations responsible for developing a plan for meeting the ",
+      "health needs, managing the NHS budget and arranging for the provision of health services ",
+      "of a specific geographical population. These are replacing clinical commissioning groups as ",
+      "a result of the Health and Care Act (2022)."
     )
   )
 }

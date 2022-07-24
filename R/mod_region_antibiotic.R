@@ -10,33 +10,17 @@
 mod_region_antibiotic_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2_tabstop("Geographical variation of prescribing of antibiotics"),
-    p("The map and chart show antibiotic prescribing metrics by selected region and sub ICB locations(SICBL)."),
-    p(
-      "Most SICBLs in East of England, North East and Yorshire and North West region did not ",
-      " meet the SOF target value of 0.871 or less for the antibacterial items STAR-PU for 12 months to April 2022 period.",
-      br(), "However, most SICLBs met the target of lower than 10% of the co-amoxiclav, cephalosporin class and quinolone as a percantage of the total ",
-      "number of antibacterial items prescribed in primary care."
-    ),
     nhs_card(
-      heading = p("Geographical variation", textOutput(outputId = ns("region_text"), inline = TRUE)),
-      # two drop down menu
-      # nhs_grid_2_col(
-      #   nhs_selectInput(
-      #     inputId = ns("metric"),
-      #     label = "Metric",
-      #     choices = c(
-      #       "Antibacterial items/STAR-PU" = "STAR_PU",
-      #       "Co-amoxiclav, Cephalosporins & Quinolones" = "COAMOX"
-      #     ),
-      #     full_width = TRUE
-      #   ),
+      heading = p(textOutput(outputId = ns("region_text_title"), inline = TRUE)),
+      br(),
+      # shinyjs::useShinyjs(),
+      shiny::htmlOutput(outputId = ns("region_text")), # try to give some sleep() to delay
+      br(),
       nhs_selectInput(
         inputId = ns("region"),
-        label = "Region",
+        label = "Select region:",
         choices = c("All", sort(unique(antibioticPrescribingScrollytellR::map_df$REGION))),
         full_width = TRUE
-        # )
       ),
 
       # map
@@ -59,8 +43,7 @@ mod_region_antibiotic_ui <- function(id) {
         class = "highcharts-caption",
         style = "font-size: 9pt",
         "Figures are presented for 12 months rolling period to", textOutput(ns("month"), inline = TRUE), ". Click map to see trend by selected geography."
-      ),
-      mod_nhs_download_ui(id = ns("map_sof_download"))
+      )
     ) # ,
     # tags$div(
     #   style = "margin-top: 25vh" # add some buffer space after the chart
@@ -75,8 +58,10 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    # shinyjs::delay(3000, shinyjs::show("region_text") ) # not sure whether this works
+
     # add title
-    output$region_text <- renderText({
+    output$region_text_title <- renderText({
       req(metric_sel())
       # observe(print(metric_sel()))
 
@@ -88,6 +73,22 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
     })
 
     # observe(print(text()))
+
+
+    output$region_text <- renderText({
+      req(metric_sel())
+
+      text <- switch(metric_sel(),
+        "STAR_PU" = paste0(
+          "In only three regions did a majority of Sub ICB locations met ",
+          "the NHS England & Improvement target. In the East of England, only one Sub ICB location met the target."
+        ),
+        "COAMOX" = paste0(
+          "In all regions, a majority of Sub ICB locations met the NHS England & Improvement target. ",
+          "In both the South West and North East & Yorkshire, all Sub ICB locations met the target."
+        )
+      )
+    })
 
     geography_df <- reactive({
       req(input$region)
@@ -399,7 +400,23 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
       }
     })
 
-    # add download handler in here
+
+    # extract list of CCG
+
+    ccg_sel <- reactive({
+      if (input$region == "All") {
+        antibioticPrescribingScrollytellR::sub_icb_df %>%
+          dplyr::distinct(SUB_ICB_NAME) %>%
+          dplyr::pull()
+      } else {
+        antibioticPrescribingScrollytellR::sub_icb_df %>%
+          dplyr::filter(REGION == input$region) %>%
+          dplyr::distinct(SUB_ICB_NAME) %>%
+          dplyr::pull()
+      }
+    })
+
+    return(ccg_sel)
   })
 }
 

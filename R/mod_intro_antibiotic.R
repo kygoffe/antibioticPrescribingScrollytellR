@@ -11,7 +11,7 @@ mod_intro_antibiotic_ui <- function(id) {
   ns <- NS(id)
   tagList(
     p(
-      "Antimicrobial resistance is a central focus of the ",
+      "Antimicrobial resistance is a focal topic of the ",
       enurl(
         text = "NHS Long Term Plan.",
         url = "https://www.longtermplan.nhs.uk/"
@@ -31,7 +31,7 @@ mod_intro_antibiotic_ui <- function(id) {
       ),
       "to assess the value that medicines deliver, in both clinical-effectiveness ",
       "and cost-effectiveness. Objective measures are required to assess and compare ",
-      "across NHS sub Integrated Care Borads (SICBL). For antibiotics, the ",
+      "across NHS sub Integrated Care Boards Locations (Sub ICB locations). For antibiotics, the ",
       enurl(
         text = "two metrics ",
         url = "https://www.nhsbsa.nhs.uk/sites/default/files/2018-04/Master%20Specifications%20March%202018.pdf"
@@ -46,18 +46,16 @@ mod_intro_antibiotic_ui <- function(id) {
         ),
         tags$li(
           tags$b("Co-amoxiclav, Cephalosporins and Quinolones % items, "),
-          "the number of prescription items for co-amoxiclav, Cephalosporins and Quinolones (antibiotic drugs) ",
+          "the number of prescription items for co-amoxiclav, cephalosporins and quinolones (antibiotic drugs) ",
           "as a percentage of the total number of prescription items for selected antibacterial drugs. ",
           "The target to reach of each SICBL is to be 10% or below."
         )
       )
     ),
-    p("Select the antibiotic comparator of interest."),
-    # br(),
     nhs_card(
       nhs_selectInput(
         inputId = ns("metric"),
-        label = "Select metric:",
+        label = "Select the antibiotic comparator of interest to see the geographical variation:",
         choices = c(
           "Antibacterial items/STAR-PU" = "STAR_PU",
           "Co-amoxiclav, Cephalosporins & Quinolones" = "COAMOX"

@@ -45,9 +45,6 @@ mod_nhs_region_trend_ui <- function(id) {
       highcharter::highchartOutput(
         outputId = ns("nhs_region_trend"),
         height = "500px"
-      ),
-      mod_nhs_download_ui(
-        id = ns("download_trend_nhs_region")
       )
     ),
     tags$div(

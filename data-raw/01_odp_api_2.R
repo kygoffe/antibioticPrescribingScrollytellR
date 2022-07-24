@@ -25,7 +25,7 @@ resources_table <- metadata_repsonse$result$resources
 
 # Rolling 12months data (same way as NHS improvement)
 # April 21 (contains 12 months rolling average), May21 etc until March 2022
-resource_name_list <- resources_table$name[77:100] # Covers from May 2020 - April 2022 (need two time period for dumbbell chart)
+resource_name_list <- resources_table$name[73:100] # Covers from May 2020 - April 2022 (need two time period for dumbbell chart)
 
 # 5.1. For loop ----------------------------------------------------------------
 
@@ -106,8 +106,9 @@ antibiotic_df <- antibiotic_df %>%
 # CCG Merge happended in april 2021 - therefore, deal two time period separately
 antibiotic_df_2021 <- antibiotic_df %>%
   filter(YEAR_MONTH %in% c(
-    202005, 202006, 202007, 202008, 202009, 202010, 202011, 202012,
-    202101, 202102, 202103, 202104
+    202001, 202002, 202003, 202004, 202005, 202006, 202007,
+    202008, 202009, 202010, 202011, 202012, 202101,
+    202102, 202103, 202104
   ))
 
 
@@ -233,158 +234,3 @@ antibiotic_practice_item_count <- antibiotic_practice %>%
   select(YEAR_MONTH, SUB_ICB_CODE, PRACTICE_NAME, PRACTICE_CODE, DRUG_OF_INTEREST, TOTAL_ITEMS)
 
 usethis::use_data(antibiotic_practice_item_count, overwrite = TRUE)
-
-
-# Amoxicillin (0501013B0)
-## UTI related
-# Pivmecillinam hydrochloride (0501015P0)
-# Nitrofurantoin (0501130R0)
-# Trimethoprim (0501080W0)
-# Fosfomycin trometamol (0501070AE)
-# Fosfomycin calcium (0501130S0)
-## 3Cs
-# Co-amoxiclav (Amoxicillin/clavulanic acid) (0501013K0)
-# Cephalosporins (BNF CODE 0501021 list)
-# 13              0501021A0                                      Cefaclor
-# 14              0501021B0                                    Cefadroxil
-# 15              0501021C0                                      Cefixime
-# 16              0501021D0                             Cefotaxime sodium
-# 17              0501021G0                            Ceftriaxone sodium
-# 18              0501021H0                      Ceftazidime pentahydrate
-# 19              0501021J0                             Cefuroxime sodium
-# 20              0501021K0                             Cefuroxime axetil
-# 21              0501021L0                                     Cefalexin
-# 22              0501021M0                                     Cefradine
-# Quinolones (BNF Code 050112)
-# 74              0501120L0                                 Ciprofloxacin
-# 75              0501120P0                                     Ofloxacin
-# 76              0501120Q0                                   Norfloxacin
-# 77              0501120X0                                  Levofloxacin
-# 78              0501120Y0                                  Moxifloxacin
-
-
-# Create STAR_PU table
-# 1_practice_df.R has STARPU denominator
-# join and retain denominator for each practice by year_month
-
-# join with denominator
-# antibiotic_practice %>%
-#   dplyr::filter(PRACTICE_CODE == "B84016") %>%
-#   filter(YEAR_MONTH > 202004 & YEAR_MONTH <= 202104) %>%
-#   summarise(sum(TOTAL_ITEMS
-#                 ))
-
-# I need to get 12 months to value to April 2021 (Values for 202005 - 202104 and 202105 - 202204)
-
-antibiotic_practice_final <-
-  antibiotic_practice %>%
-  dplyr::mutate("YEAR_MONTH" = case_when(
-    YEAR_MONTH >= 202005 & YEAR_MONTH <= 202104 ~ "Apr-21",
-    YEAR_MONTH >= 202105 & YEAR_MONTH <= 202204 ~ "Apr-22"
-  )) %>%
-  group_by(YEAR_MONTH, SUB_ICB_CODE, SUB_ICB_NAME, PRACTICE_CODE, DRUG_OF_INTEREST) %>%
-  summarise(TOTAL_ITEMS = sum(TOTAL_ITEMS, na.rm = TRUE)) %>%
-  ungroup() %>%
-  inner_join(
-    gp_star_pu_denom,
-    by = c("YEAR_MONTH", "PRACTICE_CODE")
-  ) %>%
-  mutate(STAR_PU = TOTAL_ITEMS / STARPU_DENOM) %>%
-  mutate(STAR_PU_100 = TOTAL_ITEMS / STARPU_DENOM * 100) # not sure....
-
-
-
-antibiotic_practice_final_pivot_wider <- antibiotic_practice_final %>%
-  relocate(PRACTICE_NAME, .after = PRACTICE_CODE) %>%
-  tidyr::pivot_wider(
-    id_cols = SUB_ICB_CODE:DRUG_OF_INTEREST,
-    names_from = c(YEAR_MONTH),
-    values_from = STAR_PU
-  )
-
-antibiotic_practice_final_pivot_wider <- antibiotic_practice_final_pivot_wider %>%
-  mutate(CHANGE = `Apr-22` - `Apr-21`) %>%
-  mutate(CHANGE_DIRECTION = case_when(
-    CHANGE > 0 ~ "STAR-PU increased compared to 12 months to April 2021 value",
-    CHANGE < 0 ~ "STAR-PU decreased compared to 12 months to April 2021 value"
-  )) %>%
-  select(
-    GEOGRAPHY = PRACTICE_CODE,
-    GEOGRAPHY_NAME = PRACTICE_NAME,
-    DRUG_OF_INTEREST, CHANGE_DIRECTION,
-    `Apr-21`, `Apr-22`
-  )
-
-
-
-
-
-
-# continue with this: add up down element (for tooltip)
-# count practices
-# data for dumbbell chart
-
-# also process for icb.
-
-
-
-antibiotic_icb_final <-
-  antibiotic_practice %>%
-  dplyr::mutate("YEAR_MONTH" = case_when(
-    YEAR_MONTH >= 202005 & YEAR_MONTH <= 202104 ~ "Apr-21",
-    YEAR_MONTH >= 202105 & YEAR_MONTH <= 202204 ~ "Apr-22"
-  )) %>%
-  group_by(YEAR_MONTH, SUB_ICB_CODE, SUB_ICB_NAME, DRUG_OF_INTEREST) %>%
-  summarise(TOTAL_ITEMS = sum(TOTAL_ITEMS, na.rm = TRUE)) %>%
-  ungroup() %>%
-  inner_join(
-    sub_icb_df %>%
-      distinct(YEAR_MONTH, SUB_ICB_CODE, STARPU_DENOM),
-    by = c("YEAR_MONTH", "SUB_ICB_CODE")
-  ) %>%
-  mutate(STAR_PU = TOTAL_ITEMS / STARPU_DENOM)
-
-
-
-antibiotic_icb_final_pivot_wider <- antibiotic_icb_final %>%
-  tidyr::pivot_wider(
-    id_cols = SUB_ICB_CODE:DRUG_OF_INTEREST,
-    names_from = c(YEAR_MONTH),
-    values_from = STAR_PU
-  )
-
-antibiotic_icb_final_pivot_wider <- antibiotic_icb_final_pivot_wider %>%
-  mutate(CHANGE = `Apr-22` - `Apr-21`) %>%
-  mutate(CHANGE_DIRECTION = case_when(
-    CHANGE > 0 ~ "STAR-PU increased compared to 12 months to April 2021 value",
-    CHANGE < 0 ~ "STAR-PU decreased compared to 12 months to April 2021 value"
-  )) %>%
-  select(
-    GEOGRAPHY = SUB_ICB_CODE, GEOGRAPHY_NAME = SUB_ICB_NAME,
-    DRUG_OF_INTEREST, CHANGE_DIRECTION,
-    `Apr-21`, `Apr-22`
-  )
-
-
-
-## Only for checking
-# tst_icb <- sub_icb_df %>%
-#   filter(YEAR_MONTH %in% c("Apr-21", "Apr-22")) %>%
-#   distinct(YEAR_MONTH, SUB_ICB_CODE, STARPU_NUM, STARPU_DENOM)
-#
-# check <- tst %>% left_join(tst_icb,
-#   by = c("YEAR_MONTH", "SUB_ICB_CODE")
-# )
-#
-# ##### After putting into the chart. need to check this.
-# ##### I need to manually check to get drug count is correct (when I report practice. ccg. england level )
-# check_with_open_prescribing <-
-#   check %>%
-#   filter(ODP_TOTALS != STARPU_NUM) %>%
-#   mutate(p1 = ODP_TOTALS / STARPU_DENOM, p2 = STARPU_NUM / STARPU_DENOM)
-
-# GP items breakdown (a, uti, 3cs )
-usethis::use_data(antibiotic_practice_final, overwrite = TRUE)
-usethis::use_data(antibiotic_icb_final, overwrite = TRUE)
-usethis::use_data(antibiotic_practice_final_pivot_wider, overwrite = TRUE)
-usethis::use_data(antibiotic_icb_final_pivot_wider, overwrite = TRUE)

@@ -54,7 +54,7 @@ app_ui <- function(request) {
             # New try
           ),
           tabPanel(
-            title = "Definitions",
+            title = "Glossary",
             mod_definitions_ui("definitions_ui_1")
           )
         ),

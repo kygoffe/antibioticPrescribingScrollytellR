@@ -14,7 +14,8 @@ mod_ccg_selection_ui <- function(id) {
       nhs_selectInput(
         inputId = ns("ccg"),
         label = "Sub ICB locations",
-        choices = c(sort(unique(antibioticPrescribingScrollytellR::gp_merge_df$SUB_ICB_NAME))),
+        # choices = c(sort(unique(antibioticPrescribingScrollytellR::gp_merge_df$SUB_ICB_NAME))),
+        choices = NULL,
         full_width = TRUE
       )
     )
@@ -24,13 +25,44 @@ mod_ccg_selection_ui <- function(id) {
 #' ccg_selection Server Functions
 #'
 #' @noRd
-mod_ccg_selection_server <- function(id) {
+mod_ccg_selection_server <- function(id, ccg_sel) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    ccg_sel <- reactive(input$ccg)
+    # ccg_sel <- ccg_list
+    # observe(print(paste0(ccg_sel(),"ccg_sel")))
 
-    return(ccg_sel)
+    icb_list <- reactive({
+      req(ccg_sel())
+      antibioticPrescribingScrollytellR::gp_merge_df %>%
+        dplyr::filter(SUB_ICB_NAME %in% ccg_sel()) %>%
+        dplyr::distinct(SUB_ICB_NAME)
+    })
+
+    #
+
+
+
+    # fill the name of CCG
+    observeEvent(
+      eventExpr = icb_list(),
+      handlerExpr = {
+        freezeReactiveValue(input, "ccg")
+        updateSelectInput(
+          inputId = "ccg",
+          choices =
+            unique(icb_list()$SUB_ICB_NAME) %>%
+              na.omit() %>%
+              sort()
+        )
+      }
+    )
+
+    ccg_selected <- reactive({
+      input$ccg
+    })
+
+    return(ccg_selected)
   })
 }
 
