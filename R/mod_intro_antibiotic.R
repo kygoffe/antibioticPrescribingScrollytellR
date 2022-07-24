@@ -24,6 +24,14 @@ mod_intro_antibiotic_ui <- function(id) {
     ),
     br(),
     p(
+      "This visualisation tool guides you through the main metrics used for ",
+      "monitoring antibiotic prescribing, enabling you to drill-down view the ",
+      "geographical trends from region to general practice level. ",
+      "Please check the glossary tab for any unfamiliar terms."
+    ),
+    br(),
+    h3_tabstop("Medicines Optimisation Comparators"),
+    p(
       "The NHS adopts a ",
       enurl(
         text = "medicines optimisation approach ",

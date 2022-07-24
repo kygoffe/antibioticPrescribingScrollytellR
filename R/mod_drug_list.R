@@ -10,38 +10,12 @@
 mod_drug_list_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2_tabstop("Presentations contributing to variation"),
-    p(
-      "Selected practice: ", tags$b(textOutput(outputId = ns("selected_gp"), inline = TRUE)),
-      "Further analysis by",
-      tippy(
-        text = "Amoxicillin,",
-        tooltip = tooltip_text$Amoxicillin
-      ),
-      tippy(
-        text = "Lower UTIs,",
-        tooltip = tooltip_text$UTIs
-      ),
-      tippy(
-        text = "Co-amoxiclav,",
-        tooltip = tooltip_text$coamoxiclav
-      ),
-      tippy(
-        text = "Cephalosporins",
-        tooltip = tooltip_text$cephalosporins
-      ),
-      "and ",
-      tippy(
-        text = "Quinolones",
-        tooltip = tooltip_text$quinolones
-      ),
-      "for the selected practice: ", # Need to create tippy to show the list of drugs that have been included.
-    ),
+    h2_tabstop("Antibiotic"),
     nhs_card(
-      heading = p(textOutput(outputId = ns("selected_gp_text"), inline = TRUE), "(12 months to April 2022)"),
+      # heading = p(textOutput(outputId = ns("selected_gp_text"), inline = TRUE), "(12 months to April 2022)"),
       nhs_selectInput(
         inputId = ns("drugs"),
-        label = "Drug level analysis",
+        label = "Select group of antibiotic drugs:",
         choices = c(unique(antibioticPrescribingScrollytellR::antibiotic_practice_final$DRUG_OF_INTEREST) %>%
           purrr::discard(
             .p = stringr::str_detect(
