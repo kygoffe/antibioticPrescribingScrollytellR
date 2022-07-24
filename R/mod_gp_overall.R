@@ -10,15 +10,20 @@
 mod_gp_overall_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2_tabstop("Antibiotic prescribing by general practices"),
+    h3_tabstop("General practice"),
+    # p(
+    #   textOutput(outputId = ns("selected_gp"), inline = TRUE)
+    # ),
     p(
-      textOutput(outputId = ns("selected_gp"), inline = TRUE)
+      "Prescribing information is available at the GP surgery level. ",
+      "Select a surgery below to see how it compares to those within ",
+      "its Sub-ICB region."
     ),
     nhs_card(
-      heading = "Antimicrobial Stewardship data reporting against NHS AMR metrics",
+      # heading = "Antimicrobial Stewardship data reporting against NHS AMR metrics",
       nhs_selectInput(
         inputId = ns("gp"),
-        label = "GP practice",
+        label = "Select GP practice:",
         choices = NULL, # dynamic
         full_width = TRUE
       ),
@@ -51,13 +56,12 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    output$selected_gp <- renderText({
-      req(input$gp)
-      t <- paste(input$gp)
-      return(t)
-    })
+    # output$selected_gp <- renderText({
+    #   req(input$gp)
+    #   t <- paste(input$gp)
+    #   return(t)
+    # })
 
-    observe(print(ccg_selected())) # tibble - maybe i should change to character
 
     ccg_selected_list <- reactive({
       ccg_selected()
@@ -75,8 +79,6 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
         dplyr::mutate(IMD_RANK = as.numeric(IMD_RANK))
     })
 
-    observe(print(gp_sel()))
-
     gp_list <- reactive({
       req(metric_sel())
       req(ccg_selected())
@@ -84,9 +86,6 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
         dplyr::filter(YEAR_MONTH %in% "Apr-22") %>%
         dplyr::filter(SUB_ICB_NAME %in% ccg_selected_list())
     })
-
-    observe(print(gp_list()))
-
 
     # fill the name of GP
     observeEvent(

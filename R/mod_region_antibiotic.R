@@ -80,12 +80,13 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
 
       text <- switch(metric_sel(),
         "STAR_PU" = paste0(
-          "In only three regions did a majority of Sub ICB locations met ",
-          "the NHS England & Improvement target. In the East of England, only one Sub ICB location met the target."
+          "In only three regions did a majority of Sub-ICBs met ",
+          "the NHS England & Improvement target. In the East of England, ",
+          "only one Sub-ICB met the target."
         ),
         "COAMOX" = paste0(
-          "In all regions, a majority of Sub ICB locations met the NHS England & Improvement target. ",
-          "In both the South West and North East & Yorkshire, all Sub ICB locations met the target."
+          "In all regions, a majority of Sub-ICBs met the NHS England & Improvement target. ",
+          "In both the South West and North East & Yorkshire, all Sub-ICBs met the target."
         )
       )
     })

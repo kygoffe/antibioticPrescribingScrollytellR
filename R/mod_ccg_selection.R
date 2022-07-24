@@ -10,10 +10,17 @@
 mod_ccg_selection_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    h3_tabstop("Sub Integrated Care Board"),
+    p(
+      "NHS Sub-Integrated Care Boards (Sub-ICBs) have the responsibility ",
+      "for management for healthcare provision within a given area. ",
+      "Hover over the map above to identify the Sub-ICB of interest."
+    ),
+    br(),
     nhs_card(
       nhs_selectInput(
         inputId = ns("ccg"),
-        label = "Sub ICB locations",
+        label = "Select Sub-ICB:",
         # choices = c(sort(unique(antibioticPrescribingScrollytellR::gp_merge_df$SUB_ICB_NAME))),
         choices = NULL,
         full_width = TRUE

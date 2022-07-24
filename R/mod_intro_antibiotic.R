@@ -38,8 +38,7 @@ mod_intro_antibiotic_ui <- function(id) {
         url = "https://www.england.nhs.uk/medicines-2/medicines-optimisation/"
       ),
       "to assess the value that medicines deliver, in both clinical-effectiveness ",
-      "and cost-effectiveness. Objective measures are required to assess and compare ",
-      "across NHS sub Integrated Care Boards Locations (Sub ICB locations). For antibiotics, the ",
+      "and cost-effectiveness. For antibiotics, the ",
       enurl(
         text = "two metrics ",
         url = "https://www.nhsbsa.nhs.uk/sites/default/files/2018-04/Master%20Specifications%20March%202018.pdf"
@@ -48,7 +47,7 @@ mod_intro_antibiotic_ui <- function(id) {
       tags$ul(
         tags$li(
           tags$b("Antibacterial items per STAR-PU, "),
-          "a weighted measure of number of prescription items for antibacterial drugs per ",
+          "a population stanardised for age and gender measure of number of prescription items for antibacterial drugs per ",
           "antibacterial item. The target for each SICBL is to be equal or below value ",
           "of 0.871 items per STAR-PU."
         ),

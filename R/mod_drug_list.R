@@ -10,9 +10,26 @@
 mod_drug_list_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2_tabstop("Antibiotic"),
+    h3_tabstop("Antibiotic"),
+    p(
+      "Prescribing information is available by antibiotic drug groups: ",
+      "amoxicillin, lower UTIs, co-amoxiclav, cephalosporins and ",
+      "quinolones. Select a group below to see how the practice of ",
+      "interest compares to those within its Sub-ICB region."
+    ),
     nhs_card(
-      # heading = p(textOutput(outputId = ns("selected_gp_text"), inline = TRUE), "(12 months to April 2022)"),
+      heading = p(
+        "Prescribing of",
+        textOutput(
+          outputId = ns("selected_drug_text"),
+          inline = TRUE
+        ), " at ",
+        textOutput(
+          outputId = ns("selected_gp_text"),
+          inline = TRUE
+        ),
+        "in the 12 months to April 2022."
+      ),
       nhs_selectInput(
         inputId = ns("drugs"),
         label = "Select group of antibiotic drugs:",
@@ -55,6 +72,11 @@ mod_drug_list_server <- function(id, gp_val) {
         dplyr::filter(PRACTICE_CODE == gp_val()) %>%
         dplyr::distinct(PRACTICE_NAME) %>%
         dplyr::pull()
+    })
+
+    output$selected_drug_text <- reactive({
+      drug_sel <- input$drugs
+      return(drug_sel)
     })
 
     output$selected_gp_text <- reactive({
