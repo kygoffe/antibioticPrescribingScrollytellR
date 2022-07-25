@@ -610,19 +610,28 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
 
       antibioticPrescribingScrollytellR::antibiotic_practice_item_count %>%
         dplyr::select(-PRACTICE_NAME) %>%
-        dplyr::mutate(
-          YEAR_MONTH_DATE =
-            as.Date(paste0(as.character(YEAR_MONTH), "01"),
-              format = "%Y%m%d"
-            )
-        ) %>%
         dplyr::inner_join(
           antibioticPrescribingScrollytellR::gp_merge_df %>%
             dplyr::distinct(PRACTICE_CODE, PRACTICE_NAME),
           by = c("PRACTICE_CODE")
         ) %>%
-        dplyr::filter(PRACTICE_NAME == input$gp)
+        dplyr::filter(PRACTICE_NAME == input$gp) %>%
+        # Add fill the empty
+        dplyr::group_split(SUB_ICB_CODE, PRACTICE_NAME, DRUG_OF_INTEREST) %>%
+        purrr::map(., dplyr::right_join, antibioticPrescribingScrollytellR::year_month) %>%
+        purrr::map(., tidyr::fill, SUB_ICB_CODE, PRACTICE_CODE, PRACTICE_NAME, DRUG_OF_INTEREST) %>%
+        dplyr::bind_rows() %>%
+        dplyr::arrange(PRACTICE_NAME, DRUG_OF_INTEREST, YEAR_MONTH) %>%
+        dplyr::mutate(TOTAL_ITEMS = ifelse(is.na(TOTAL_ITEMS), 0, TOTAL_ITEMS)) %>%
+        dplyr::mutate(
+          YEAR_MONTH_DATE =
+            as.Date(paste0(as.character(YEAR_MONTH), "01"),
+              format = "%Y%m%d"
+            )
+        )
     })
+
+    # observe(print(item_plot_df()))
 
     output$item_trend <- highcharter::renderHighchart({
       export <- list(

@@ -249,7 +249,7 @@ antibiotic_practice_item_count <- antibiotic_practice_item_count %>%
 
 
 usethis::use_data(antibiotic_practice_item_count, overwrite = TRUE)
-
+usethis::use_data(year_month, overwrite = TRUE)
 
 # Amoxicillin (0501013B0)
 ## UTI related

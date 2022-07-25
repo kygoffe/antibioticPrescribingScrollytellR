@@ -50,6 +50,18 @@ mod_definitions_ui <- function(id) {
     p(
       tags$b(
         enurl(
+          text = "Lower UTI",
+          url = "https://www.nhsbsa.nhs.uk/access-our-data-products/epact2/dashboards-and-specifications/antimicrobial-stewardship-rightcare-uti-focus-pack-dashboard"
+        )
+      ),
+      br(),
+      "In this context, it refers to these antibiotics prescribed to treat lower urinary taract infections: ",
+      "pivmecillinam hydrochloride, cefaclor, cefadroxil, cefixime, cefuroxime axetil, cefalexin, cefradine, fosfomycin trometamol, ",
+      "trimethoprim, nitrofurantoin, and fosfomycin calcium."
+    ),
+    p(
+      tags$b(
+        enurl(
           text = "Quinolones",
           url = "https://bnf.nice.org.uk/treatment-summaries/quinolones/"
         )
