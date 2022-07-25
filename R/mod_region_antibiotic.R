@@ -22,7 +22,11 @@ mod_region_antibiotic_ui <- function(id) {
         choices = c("All", sort(unique(antibioticPrescribingScrollytellR::map_df$REGION))),
         full_width = TRUE
       ),
-
+      tags$text(
+        class = "highcharts-caption",
+        style = "font-size: 9pt",
+        "Click map to see annual trend by Sub-ICB location."
+      ),
       # map
       highcharter::highchartOutput(
         outputId = ns("map_chart"),
@@ -38,11 +42,6 @@ mod_region_antibiotic_ui <- function(id) {
           outputId = ns("sof_trend"),
           height = "350px"
         )
-      ),
-      tags$text(
-        class = "highcharts-caption",
-        style = "font-size: 9pt",
-        "Figures are presented for 12 months rolling period to", textOutput(ns("month"), inline = TRUE), ". Click map to see trend by selected geography."
       )
     ) # ,
     # tags$div(
@@ -80,11 +79,13 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
 
       text <- switch(metric_sel(),
         "STAR_PU" = paste0(
+          "Figures are presented for 12 months rolling period to April 2022.", br(), br(),
           "In only three regions did a majority of Sub-ICBs met ",
           "the NHS England & Improvement target. In the East of England, ",
           "only one Sub-ICB met the target."
         ),
         "COAMOX" = paste0(
+          "Figures are presented for 12 months rolling period to April 2022.", br(), br(),
           "In all regions, a majority of Sub-ICBs met the NHS England & Improvement target. ",
           "In both the South West and North East & Yorkshire, all Sub-ICBs met the target."
         )
@@ -132,6 +133,31 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
     output$map_chart <- highcharter::renderHighchart({
       req(metric_sel())
 
+      # Define export options
+
+      export <- list(
+        list(
+          text = "PNG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/png' }); }")
+        ),
+        list(
+          text = "JPEG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/jpeg' }); }")
+        ),
+        list(
+          text = "SVG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/svg+xml' }); }")
+        ),
+        list(
+          text = "PDF",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'application/pdf' }); }")
+        )
+      )
+
       if (metric_sel() == "STAR_PU") {
         highcharter::highchart() %>%
           highcharter::hc_add_series_map(
@@ -165,8 +191,8 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
           # highcharter::hc_legend(enabled = FALSE) %>%
           highcharter::hc_legend(
             enabled = TRUE,
-            verticalAlign = "bottom",
-            title = list(text = paste("12 months to", "Apr-22"))
+            verticalAlign = "bottom" # ,
+            # title = list(text = paste("12 months to", "Apr-22"))
           ) %>%
           highcharter::hc_plotOptions(
             map = list(
@@ -180,6 +206,16 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
                 "
                   )
                 )
+              )
+            )
+          ) %>%
+          highcharter::hc_exporting(
+            enabled = TRUE,
+            filename = "region",
+            buttons = list(
+              contextButton = list(
+                text = "Export",
+                menuItems = export
               )
             )
           )
@@ -216,8 +252,8 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
           # highcharter::hc_legend(enabled = FALSE) %>%
           highcharter::hc_legend(
             enabled = TRUE,
-            verticalAlign = "bottom",
-            title = list(text = paste("12 months to", "Apr-22"))
+            verticalAlign = "bottom" # ,
+            # title = list(text = paste("12 months to", "Apr-22"))
           ) %>%
           highcharter::hc_plotOptions(
             map = list(
@@ -233,6 +269,16 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
                 )
               )
             )
+          ) %>%
+          highcharter::hc_exporting(
+            enabled = TRUE,
+            filename = "region",
+            buttons = list(
+              contextButton = list(
+                text = "Export",
+                menuItems = export
+              )
+            )
           )
       }
     })
@@ -241,7 +287,6 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
     observeEvent(input$mapclick_sof, {
       output$sof_trend <- highcharter::renderHighchart({
         req(input$mapclick_sof)
-
 
         reference_value <- switch(metric_sel(),
           "STAR_PU" = 0.871,
@@ -288,8 +333,7 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
             min = 0,
             max = max_val(),
             title = list(
-              text = "12 rolling month trend",
-              align = "middle"
+              text = ""
             ),
             plotLines = list(list(
               value = reference_value, color = "#8A1538", width = 1,
@@ -302,10 +346,7 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
           ) %>%
           highcharter::hc_xAxis(
             # categories = antibioticPrescribingScrollytellR::sub_icb_df$YEAR_MONTH,
-            title = list(text = "12 months to"),
-            labels = list(
-              rotation = 90
-            )
+            title = list(text = "")
           ) %>%
           highcharter::hc_plotOptions(
             series = list(
@@ -358,11 +399,35 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
     })
 
     output$sof_compare <- highcharter::renderHighchart({
+      export <- list(
+        list(
+          text = "PNG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/png' }); }")
+        ),
+        list(
+          text = "JPEG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/jpeg' }); }")
+        ),
+        list(
+          text = "SVG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/svg+xml' }); }")
+        ),
+        list(
+          text = "PDF",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'application/pdf' }); }")
+        )
+      )
+
       if (metric_sel() == "STAR_PU") {
         highcharter::highchart() %>%
           highcharter::hc_chart(type = "bar") %>%
           highcharter::hc_plotOptions(series = list(stacking = "normal")) %>%
           highcharter::hc_xAxis(categories = geography_compare_df()$REGION) %>%
+          highcharter::hc_yAxis(title = (list(text = "Sub-ICB count"))) %>%
           highcharter::hc_add_series(
             name = "Antibacterial items/STAR-PU greater than 0.871(Not met target)",
             data = geography_compare_df()$NOT_MEET,
@@ -377,12 +442,23 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
           highcharter::hc_legend(enabled = FALSE) %>%
           highcharter::hc_tooltip(
             shared = TRUE
+          ) %>%
+          highcharter::hc_exporting(
+            enabled = TRUE,
+            filename = "region",
+            buttons = list(
+              contextButton = list(
+                text = "Export",
+                menuItems = export
+              )
+            )
           )
       } else {
         highcharter::highchart() %>%
           highcharter::hc_chart(type = "bar") %>%
           highcharter::hc_plotOptions(series = list(stacking = "normal")) %>%
           highcharter::hc_xAxis(categories = geography_compare_df()$REGION) %>%
+          highcharter::hc_yAxis(title = (list(text = "Sub-ICB count"))) %>%
           highcharter::hc_add_series(
             name = "Co-amoxiclav, Cephalosporins & Quinolones greater than 10% (Not met target)",
             data = geography_compare_df()$NOT_MEET,
@@ -397,6 +473,16 @@ mod_region_antibiotic_server <- function(id, metric_sel = metric_sel) {
           highcharter::hc_legend(enabled = FALSE) %>%
           highcharter::hc_tooltip(
             shared = TRUE
+          ) %>%
+          highcharter::hc_exporting(
+            enabled = TRUE,
+            filename = "region",
+            buttons = list(
+              contextButton = list(
+                text = "Export",
+                menuItems = export
+              )
+            )
           )
       }
     })

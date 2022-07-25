@@ -33,13 +33,11 @@ mod_gp_overall_ui <- function(id) {
         outputId = ns("bar_chart"),
         height = "250px"
       ),
-      shiny::htmlOutput(ns("metric_qunitile_chart_text")),
       # scatterplot - practice starpu vs imd rank
       highcharter::highchartOutput(
         outputId = ns("metric_quintile_chart"),
         height = "300px"
       ),
-      shiny::htmlOutput(ns("trend_chart_text")),
       # item trend chart
       highcharter::highchartOutput(
         outputId = ns("item_trend"),
@@ -168,6 +166,29 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
     # Create bar chart
 
     output$bar_chart <- highcharter::renderHighchart({
+      export <- list(
+        list(
+          text = "PNG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/png' }); }")
+        ),
+        list(
+          text = "JPEG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/jpeg' }); }")
+        ),
+        list(
+          text = "SVG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/svg+xml' }); }")
+        ),
+        list(
+          text = "PDF",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'application/pdf' }); }")
+        )
+      )
+
       validate(
         need(nrow(plot_df()) > 0, message = FALSE)
       ) # stopping to show temporary error message.
@@ -182,7 +203,7 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
         ) %>%
         theme_nhsbsa() %>%
         highcharter::hc_xAxis(
-          title = list(text = "12 months to April 2022")
+          title = list(text = "")
         ) %>%
         highcharter::hc_yAxis(
           min = 0,
@@ -199,8 +220,18 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
         highcharter::hc_tooltip(
           shared = TRUE,
           pointFormat = switch(metric_sel(),
-            "STAR-PU" = "<b>STAR_PU: {point.y:.2f}</b>",
-            "COAMOX" = "<b>{point.y:.1f}%</b>"
+            "STAR_PU" = "Value:  {point.y:.2f}",
+            "COAMOX" = "Value: {point.y:.1f}%"
+          )
+        ) %>%
+        highcharter::hc_exporting(
+          enabled = TRUE,
+          filename = "gp",
+          buttons = list(
+            contextButton = list(
+              text = "Export",
+              menuItems = export
+            )
           )
         )
     })
@@ -395,6 +426,30 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
         need(nrow(plot_trend_df()) > 0, message = FALSE)
       ) # stopping to show temporary error message.
 
+      export <- list(
+        list(
+          text = "PNG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/png' }); }")
+        ),
+        list(
+          text = "JPEG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/jpeg' }); }")
+        ),
+        list(
+          text = "SVG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/svg+xml' }); }")
+        ),
+        list(
+          text = "PDF",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'application/pdf' }); }")
+        )
+      )
+
+
       plot_trend_df() %>%
         highcharter::hchart(
           type = "line",
@@ -425,20 +480,8 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
           ))
         ) %>%
         highcharter::hc_xAxis(
-          title = list(text = "12 months to:")
+          title = list(text = "")
         )
-    })
-
-    # trend chart text
-
-    output$trend_chart_text <- renderUI({
-      tags$text(
-        class = "highcharts-caption",
-        switch(metric_sel(),
-          "STAR_PU" = "add text for the trend chart",
-          "COAMOX" = "add text for the trend chart"
-        )
-      )
     })
 
     gp_val <- reactive({
@@ -475,6 +518,30 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
     })
 
     output$metric_quintile_chart <- highcharter::renderHighchart({
+      export <- list(
+        list(
+          text = "PNG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/png' }); }")
+        ),
+        list(
+          text = "JPEG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/jpeg' }); }")
+        ),
+        list(
+          text = "SVG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/svg+xml' }); }")
+        ),
+        list(
+          text = "PDF",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'application/pdf' }); }")
+        )
+      )
+
+
       metric_quintile_df() %>%
         highcharter::hchart(
           type = "column",
@@ -486,7 +553,7 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
         ) %>%
         theme_nhsbsa(stack = NA) %>%
         highcharter::hc_xAxis(
-          title = list(text = "GP practices"),
+          title = list(text = "GP surgeries ranked"),
           labels = list(enabled = FALSE)
         ) %>%
         highcharter::hc_yAxis(
@@ -525,6 +592,16 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
               }
               "
           )
+        ) %>%
+        highcharter::hc_exporting(
+          enabled = TRUE,
+          filename = "gp_quintile",
+          buttons = list(
+            contextButton = list(
+              text = "Export",
+              menuItems = export
+            )
+          )
         )
     })
 
@@ -548,6 +625,30 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
     })
 
     output$item_trend <- highcharter::renderHighchart({
+      export <- list(
+        list(
+          text = "PNG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/png' }); }")
+        ),
+        list(
+          text = "JPEG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/jpeg' }); }")
+        ),
+        list(
+          text = "SVG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/svg+xml' }); }")
+        ),
+        list(
+          text = "PDF",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'application/pdf' }); }")
+        )
+      )
+
+
       req(gp_val())
 
       item_plot_df() %>%
@@ -562,7 +663,7 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
         theme_nhsbsa(stack = NA) %>%
         highcharter::hc_xAxis(
           title = list(
-            text = list("Year month")
+            text = list("")
           )
         ) %>%
         highcharter::hc_yAxis(
@@ -584,6 +685,16 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
               return(outHTML)
             }
             "
+          )
+        ) %>%
+        highcharter::hc_exporting(
+          enabled = TRUE,
+          filename = "gp_items",
+          buttons = list(
+            contextButton = list(
+              text = "Export",
+              menuItems = export
+            )
           )
         )
     })

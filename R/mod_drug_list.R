@@ -138,6 +138,29 @@ mod_drug_list_server <- function(id, gp_val) {
 
     # Create first bar chart
     output$drug_chart <- highcharter::renderHighchart({
+      export <- list(
+        list(
+          text = "PNG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/png' }); }")
+        ),
+        list(
+          text = "JPEG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/jpeg' }); }")
+        ),
+        list(
+          text = "SVG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/svg+xml' }); }")
+        ),
+        list(
+          text = "PDF",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'application/pdf' }); }")
+        )
+      )
+
       plot_df() %>%
         highcharter::hchart(
           type = "column",
@@ -168,6 +191,16 @@ mod_drug_list_server <- function(id, gp_val) {
                 return outHTML
               }
             "
+          )
+        ) %>%
+        highcharter::hc_exporting(
+          enabled = TRUE,
+          filename = "drug_items",
+          buttons = list(
+            contextButton = list(
+              text = "Export",
+              menuItems = export
+            )
           )
         )
     })
@@ -237,6 +270,29 @@ mod_drug_list_server <- function(id, gp_val) {
       # req(input$drugs)
       # req(gp_val())
 
+      export <- list(
+        list(
+          text = "PNG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/png' }); }")
+        ),
+        list(
+          text = "JPEG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/jpeg' }); }")
+        ),
+        list(
+          text = "SVG",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'image/svg+xml' }); }")
+        ),
+        list(
+          text = "PDF",
+          onclick = highcharter::JS("function () {
+                   this.exportChart({ type: 'application/pdf' }); }")
+        )
+      )
+
       trend_bar_df() %>%
         highcharter::hchart(
           type = "column",
@@ -248,7 +304,7 @@ mod_drug_list_server <- function(id, gp_val) {
         ) %>%
         theme_nhsbsa(stack = NA) %>%
         highcharter::hc_xAxis(
-          title = list(text = "GP practices"),
+          title = list(text = "GP surgeries ranked"),
           labels = list(enabled = FALSE)
         ) %>%
         highcharter::hc_yAxis(
@@ -272,6 +328,16 @@ mod_drug_list_server <- function(id, gp_val) {
                 return outHTML;
             }
             "
+            )
+          )
+        ) %>%
+        highcharter::hc_exporting(
+          enabled = TRUE,
+          filename = "drug_quintile",
+          buttons = list(
+            contextButton = list(
+              text = "Export",
+              menuItems = export
             )
           )
         )

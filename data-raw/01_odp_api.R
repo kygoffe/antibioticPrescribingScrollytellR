@@ -1,4 +1,6 @@
 library(dplyr)
+library(tidyr)
+library(purrr)
 devtools::load_all()
 
 
@@ -231,6 +233,20 @@ antibiotic_practice <- bind_rows(antibiotic_practice, antibiotic_practice_luti)
 
 antibiotic_practice_item_count <- antibiotic_practice %>%
   select(YEAR_MONTH, SUB_ICB_CODE, PRACTICE_NAME, PRACTICE_CODE, DRUG_OF_INTEREST, TOTAL_ITEMS)
+
+
+year_month <- antibiotic_practice_item_count %>%
+  distinct(YEAR_MONTH)
+
+
+antibiotic_practice_item_count <- antibiotic_practice_item_count %>%
+  group_split(SUB_ICB_CODE, PRACTICE_NAME, DRUG_OF_INTEREST) %>%
+  purrr::map(., right_join, year_month) %>%
+  purrr::map(., fill, SUB_ICB_CODE, PRACTICE_CODE, PRACTICE_NAME, DRUG_OF_INTEREST) %>%
+  bind_rows() %>%
+  arrange(PRACTICE_NAME, DRUG_OF_INTEREST, YEAR_MONTH) %>%
+  mutate(TOTAL_ITEMS = ifelse(is.na(TOTAL_ITEMS), 0, TOTAL_ITEMS))
+
 
 usethis::use_data(antibiotic_practice_item_count, overwrite = TRUE)
 

@@ -25,8 +25,8 @@ mod_intro_antibiotic_ui <- function(id) {
     br(),
     p(
       "This visualisation tool guides you through the main metrics used for ",
-      "monitoring antibiotic prescribing, enabling you to drill-down view the ",
-      "geographical trends from region to general practice level. ",
+      "monitoring antibiotic prescribing, enabling you to drill-down and view the ",
+      "geographical trends from region to general practice level. ", br(),
       "Please check the glossary tab for any unfamiliar terms."
     ),
     br(),
@@ -47,15 +47,15 @@ mod_intro_antibiotic_ui <- function(id) {
       tags$ul(
         tags$li(
           tags$b("Antibacterial items per STAR-PU, "),
-          "a population stanardised for age and gender measure of number of prescription items for antibacterial drugs per ",
-          "antibacterial item. The target for each SICBL is to be equal or below value ",
+          "a population stanardised for age and gender measure of the number of prescription items for antibacterial drugs per ",
+          "antibacterial item. The target for each Sub-ICB location is to be equal or below value ",
           "of 0.871 items per STAR-PU."
         ),
         tags$li(
           tags$b("Co-amoxiclav, Cephalosporins and Quinolones % items, "),
           "the number of prescription items for co-amoxiclav, cephalosporins and quinolones (antibiotic drugs) ",
           "as a percentage of the total number of prescription items for selected antibacterial drugs. ",
-          "The target to reach of each SICBL is to be 10% or below."
+          "The target to reach of each Sub-ICB location is to be 10% or below."
         )
       )
     ),

@@ -77,17 +77,6 @@ mod_definitions_ui <- function(id) {
     p(
       tags$b(
         enurl(
-          text = "STAR-PU",
-          url = "https://www.nhs.uk/scorecard/12030"
-        )
-      ),
-      br(),
-      "Average daily quantity of Hypnotics prescribed per Specific Therapeutic group ",
-      "Age-sex Related Prescribing Unit (STAR PU)"
-    ),
-    p(
-      tags$b(
-        enurl(
           text = "Integrated Care Boards",
           url = "https://www.england.nhs.uk/integratedcare/what-is-integrated-care/"
         )
@@ -97,6 +86,17 @@ mod_definitions_ui <- function(id) {
       "health needs, managing the NHS budget and arranging for the provision of health services ",
       "of a specific geographical population. These are replacing clinical commissioning groups as ",
       "a result of the Health and Care Act (2022)."
+    ),
+    p(
+      tags$b(
+        enurl(
+          text = "NHS Long Term Plan",
+          url = "https://www.longtermplan.nhs.uk/"
+        )
+      ),
+      br(),
+      "Published in 2019 by NHS England, the NHS Long Term Plan set out the healthcare priorities ",
+      "for the following 10 years."
     )
   )
 }
