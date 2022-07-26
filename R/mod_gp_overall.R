@@ -220,8 +220,8 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
         highcharter::hc_tooltip(
           shared = TRUE,
           pointFormat = switch(metric_sel(),
-            "STAR_PU" = "Value:  {point.y:.2f}",
-            "COAMOX" = "Value: {point.y:.1f}%"
+            "STAR_PU" = "Item STAR-PU:  {point.y:.2f}",
+            "COAMOX" = "Co-amoxiclav, Cephalosporins & Quinolones: {point.y:.1f}%"
           )
         ) %>%
         highcharter::hc_exporting(
