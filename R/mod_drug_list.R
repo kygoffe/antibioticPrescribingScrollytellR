@@ -322,7 +322,6 @@ mod_drug_list_server <- function(id, gp_val) {
                   '<b>' + this.point.DRUG_OF_INTEREST + '</b> <br>' +
                   '<b>Name: </b>' + this.point.GEOGRAPHY_NAME + '<br>' +
                   '<b>Quintile rank: </b>' + this.point.QUINTILE_RANK + '<br>' +
-                  '<b>Compare with 12 months to April 2021: </b>' + this.point.CHANGE_DIRECTION + '<br>' +
                   '<b>Number of items: </b>' + Highcharts.numberFormat(this.point.TOTAL_ITEMS,0) + '<br>' +
                   '<b>Items for STAR-PU: </b>' + Highcharts.numberFormat(this.point.STAR_PU,3)
                 return outHTML;

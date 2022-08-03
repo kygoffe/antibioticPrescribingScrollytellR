@@ -27,7 +27,7 @@ mod_gp_overall_ui <- function(id) {
         choices = NULL, # dynamic
         full_width = TRUE
       ),
-      shiny::htmlOutput(ns("bar_chart_text")),
+      shiny::htmlOutput(outputId = ns("gp_text")),
       # bar chart
       highcharter::highchartOutput(
         outputId = ns("bar_chart"),
@@ -63,6 +63,13 @@ mod_gp_overall_server <- function(id, metric_sel, ccg_selected) {
 
     ccg_selected_list <- reactive({
       ccg_selected()
+    })
+    
+    
+    output$gp_text <- renderText({
+      text <- "Figures are presented for 12 months rolling period to April 2022."
+      
+      return(text)
     })
 
 
