@@ -68,12 +68,22 @@ sus_score <- sus %>%
   group_by(name) %>% 
   summarise(sus_score = sum(response_2) * 2.5)
 
-sus_score <- sus_score %>%
-  separate(name, c("first", "id", "third"), sep = "_") %>% 
-  select(-first, -third)
 
-sus_score %>% group_by(id) %>% 
-  summarise(average_sus_score = mean(sus_score))
+sus_score_summary <- sus_score %>%
+  separate(name, c("first", "id", "id_1"), sep = "_") %>% 
+  select(-first)
+
+
+
+
+sus_score_summary %>% group_by(id) %>% 
+  summarise(average_sus_score = mean(sus_score),
+            .groups = "drop")
   
+sus_score_summary %>% 
+  arrange(id_1)  %>% 
+  View()
+  
+# 8 out of 10 gave the highest score.
   
  
