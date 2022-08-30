@@ -10,18 +10,17 @@
 mod_nhs_region_trend_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2_tabstop("Long term trends"),
+    h2_tabstop("AMR long term trends"),
     p(
       "Antimicrobial resistance (AMR) is one of the biggest threats to global public health. ",
       "NHS antimicrobial activity since COVID-19 pandemic.",
-      "The first visualisation shows the total number of items in the NHS England regions",
-      "Drilldown to CCG and GP practice? (GP practice data will download from open data portal API)"
+      "The first visualisation shows the total number of items in the seven NHS England regions"
     ),
     p(
       "add text here"
     ),
     nhs_card(
-      heading = "Number of monthly antibiotic items prescribed by NHS region",
+      heading = "Number of monthly antibiotic items (BNF 5.1) prescribed by NHS region",
       nhs_grid_2_col(
         nhs_selectInput(
           inputId = ns("region"),
@@ -45,6 +44,9 @@ mod_nhs_region_trend_ui <- function(id) {
       highcharter::highchartOutput(
         outputId = ns("nhs_region_trend"),
         height = "500px"
+      ),
+      mod_nhs_download_ui(
+        id = ns("download_trend_nhs_region")
       )
     ),
     tags$div(
@@ -59,7 +61,7 @@ mod_nhs_region_trend_ui <- function(id) {
 mod_nhs_region_trend_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    
     nhs_region_df <- reactive({
       req(input$age_band)
       req(input$region)
@@ -90,7 +92,7 @@ mod_nhs_region_trend_server <- function(id) {
           dplyr::filter(YEAR_MONTH != 202003)
       }
     })
-
+    
     output$nhs_region_trend <- highcharter::renderHighchart({
       # 20062022 - need to add line chart (similar to LIS chart)
       # Data processing
