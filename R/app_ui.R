@@ -46,17 +46,17 @@ app_ui <- function(request) {
             title = "Article",
             mod_intro_antibiotic_ui("intro_antibiotic_1"),
             mod_region_antibiotic_ui("region_antibiotic_1"),
-            mod_ccg_selection_ui("ccg_selection_1"),
-            mod_gp_overall_ui("gp_overall_1"),
-            mod_drug_list_ui("drug_list_1")
+            # mod_ccg_selection_ui("ccg_selection_1"),
+            # mod_gp_overall_ui("gp_overall_1"),
+            # mod_drug_list_ui("drug_list_1")
 
-            # mod_nhs_region_trend_ui("nhs_region_trend_1"),
+            mod_nhs_region_trend_ui("nhs_region_trend_1"),
             # New try
-          ),
-          tabPanel(
-            title = "Glossary",
-            mod_definitions_ui("definitions_ui_1")
-          )
+          )#,
+          # tabPanel(
+          #   title = "Glossary",
+          #   mod_definitions_ui("definitions_ui_1")
+          # )
         ),
         # reset vertical scroll bar when clicking tabpanel link
         # code cribbed from https://stackoverflow.com/questions/44686681/r-shiny-tabpanel-does-not-automatically-got-to-top-of-page-when-clicked
